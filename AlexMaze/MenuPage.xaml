@@ -1,0 +1,22 @@
+﻿<Page x:Class="AlexMaze.MenuPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:AlexMaze"
+      mc:Ignorable="d" 
+      d:DesignHeight="540" d:DesignWidth="500"
+      Title="MenuPage">
+
+    <Grid Background ="LightGray">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="170"/>
+            <RowDefinition Height="170"/>
+        </Grid.RowDefinitions>
+        <TextBlock Grid.Row="0" Height="35" FontSize="26" Text="Enter your name:     " HorizontalAlignment="Center"/>
+        <TextBox x:Name="NameTextBox" Grid.Row="0" HorizontalAlignment="Center" VerticalAlignment="Bottom" Height="50" Width="250" FontSize="26"/>
+        <Button x:Name="NewGameButton" Grid.Row="1" Content="New Game" HorizontalAlignment="Center" VerticalAlignment="Center" Height="50" Width="250" FontSize="26" Click="NewGameButton_Click"/>
+        <Button x:Name="StatisticButton" Grid.Row="2" Content="Statistic" HorizontalAlignment="Center" VerticalAlignment="Top" Height="50" Width="250" FontSize="26"/>
+    </Grid>
+</Page>

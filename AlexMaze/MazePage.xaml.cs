@@ -16,14 +16,13 @@ using System.Windows.Shapes;
 namespace AlexMaze
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for MazePage.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MazePage : Page
     {
-        public MainWindow()
+        public MazePage()
         {
             InitializeComponent();
-            MainFrame.Content = new MenuPage();
         }
     }
 }
