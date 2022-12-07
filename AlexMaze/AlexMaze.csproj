@@ -7,4 +7,20 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Images\Ground.png" />
+    <None Remove="Images\Player.png" />
+    <None Remove="Images\Wall.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AlexMazeEngine\AlexMazeEngine.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Images\Ground.png" />
+    <Resource Include="Images\Player.png" />
+    <Resource Include="Images\Wall.png" />
+  </ItemGroup>
+
 </Project>

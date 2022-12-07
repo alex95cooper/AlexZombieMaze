@@ -6,37 +6,26 @@
       xmlns:local="clr-namespace:AlexMaze"
       mc:Ignorable="d" 
       d:DesignHeight="540" d:DesignWidth="500"
-      Title="MazePage">
+      Title="MazePage" Loaded="Page_Loaded">
 
-    <Grid>
+    <Grid x:Name="GamePageGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
             <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-        </Grid.ColumnDefinitions>
-        <StackPanel />
-        <TextBlock Grid.ColumnSpan="4" HorizontalAlignment="Stretch" Text="TextBlock" VerticalAlignment="Stretch"/>
-        <TextBlock Grid.Column="4" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" Text="TextBlock" VerticalAlignment="Stretch" />
-        <TextBlock Grid.Column="7" Grid.ColumnSpan="3" HorizontalAlignment="Stretch" Text="TextBlock" VerticalAlignment="Stretch"/>
+
+        <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <Border Width="220" BorderThickness="5" BorderBrush="ForestGreen">
+                <TextBlock Text="TextBlock" VerticalAlignment="Stretch"/>
+            </Border>
+            <Border Width="140" BorderThickness="5" BorderBrush="Orange">
+                <TextBlock Text="TextBlock" VerticalAlignment="Stretch"/>
+            </Border>
+            <Border Width="125" BorderThickness="5" BorderBrush="Yellow">
+                <TextBlock Text="TextBlock" VerticalAlignment="Stretch"/>
+            </Border>
+        </StackPanel>
+
+        <Grid x:Name="MazeGrid" Grid.Row="1"/>
     </Grid>
 </Page>
