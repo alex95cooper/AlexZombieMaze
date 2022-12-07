@@ -16,16 +16,25 @@
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
             <Border Width="220" BorderThickness="5" BorderBrush="ForestGreen">
-                <TextBlock Text="TextBlock" VerticalAlignment="Stretch"/>
+                <TextBlock x:Name ="NameBlock" VerticalAlignment="Stretch"
+                           FontSize="20" FontWeight="Bold" 
+                           Foreground="ForestGreen"/>
             </Border>
             <Border Width="140" BorderThickness="5" BorderBrush="Orange">
                 <TextBlock Text="TextBlock" VerticalAlignment="Stretch"/>
             </Border>
-            <Border Width="125" BorderThickness="5" BorderBrush="Yellow">
-                <TextBlock Text="TextBlock" VerticalAlignment="Stretch"/>
+            <Border Width="125" BorderThickness="5" BorderBrush="YellowGreen">
+                <TextBlock x:Name ="TimeBlock"  Text="00:00:00" 
+                           VerticalAlignment="Stretch" 
+                           FontSize="20" FontWeight="Bold" 
+                           Foreground="YellowGreen" HorizontalAlignment="Center" />
             </Border>
         </StackPanel>
 
-        <Grid x:Name="MazeGrid" Grid.Row="1"/>
+
+        <Grid x:Name="MazeGrid" Grid.Row="1">
+            <Rectangle x:Name="Player" Width="40" Height="40"></Rectangle>
+        </Grid>
+        
     </Grid>
 </Page>

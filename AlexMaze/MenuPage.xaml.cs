@@ -15,9 +15,8 @@ using System.Windows.Shapes;
 
 namespace AlexMaze
 {
-    /// <summary>
-    /// Interaction logic for MenuPage.xaml
-    /// </summary>
+    
+
     public partial class MenuPage : Page
     {
         public MenuPage()
@@ -27,7 +26,8 @@ namespace AlexMaze
 
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.Navigate(new MazePage());
+            string playerName = NameTextBox.Text;
+            NavigationService.Navigate(new MazePage(playerName));
         }
     }
 }
