@@ -59,7 +59,7 @@ namespace AlexMazeEngine
             }
         }
 
-        private Point GetRandomPoint(int pillarIndex)
+        private static Point GetRandomPoint(int pillarIndex)
         {
             Random random = new();
             int halfMazeSize = SmallMazeSize / 2;
@@ -103,7 +103,7 @@ namespace AlexMazeEngine
             return false;
         }
 
-        private bool CheckIfPointInTheCorner(Point point)
+        private static bool CheckIfPointInTheCorner(Point point)
         {
             if (point.Y is 0 or (SmallMazeSize - 1))
             {
@@ -306,7 +306,7 @@ namespace AlexMazeEngine
             return false;
         }
 
-        private bool CheckIfPointNotOnBorder(Point point)
+        private static bool CheckIfPointNotOnBorder(Point point)
         {
             return point.Y > 0 && point.X > 0 &&
                 point.Y < SmallMazeSize - 1 &&

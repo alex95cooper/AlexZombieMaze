@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:AlexMaze"
       mc:Ignorable="d" 
-      d:DesignHeight="540" d:DesignWidth="500"
+      d:DesignHeight="560" d:DesignWidth="495"
       Title="MenuPage">
 
     <Grid Background ="LightGray">
@@ -14,7 +14,7 @@
             <RowDefinition Height="170"/>
             <RowDefinition Height="170"/>
         </Grid.RowDefinitions>
-        <TextBlock Grid.Row="0" Height="35" FontSize="28" Text="Enter your name:     " HorizontalAlignment="Center"/>
+        <TextBlock Grid.Row="0" Height="35" FontSize="28" Text="Enter your name:"  Margin="115,30, 0,0"/>
         <TextBox x:Name="NameTextBox" Grid.Row="0" 
                  HorizontalAlignment="Center" 
                  VerticalAlignment="Bottom" 

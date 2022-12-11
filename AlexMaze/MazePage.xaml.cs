@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
+
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,89 +21,142 @@ namespace AlexMaze
 {
     public partial class MazePage : Page
     {
+        private const int MazeBlockSize = 44;
         private const int MazeSize = 11;
 
+        private readonly DispatcherTimer _motionTimer = new();
         private readonly DispatcherTimer _gameTimer = new();
         private readonly Stopwatch _stopwatch = new();
+        private readonly List<Rect> _walls = new();
 
         private bool[,] _maze;
-        private System.Windows.Shapes.Rectangle _player = new();
+        private Player _player;
+
+        private int _score;
 
         public MazePage(string playerName)
         {
             InitializeComponent();
+            _player = new(@"Images\PlayerRight.png");
             _maze = new bool[MazeSize, MazeSize];
             NameBlock.Text = " " + playerName;
-            ShowTime();
+            DisplayGameTime();
+            LoadNewGame();
+
         }
 
-        private void ShowTime()
+        private void MazeCanvas_KeyDown(object sender, KeyEventArgs e)
         {
-            TimeSpan time = new TimeSpan(0, 0, 1);
-            _gameTimer.Interval = time;
+            _player.SetMove(e);
+        }
+
+        private void MazeCanvas_KeyUp(object sender, KeyEventArgs e)
+        {
+            _player.Stop();
+        }
+        private void MotionLoop(object? sender, EventArgs e)
+        {
+            _player.Move();
+            _player.TryMove(_walls);
+
+        }
+
+        private void DisplayGameTime()
+        {
+            TimeSpan gameTime = new(0, 0, 1);
+            _gameTimer.Interval = gameTime;
             _gameTimer.IsEnabled = true;
             _gameTimer.Tick += (obj, e) => { TimeBlock.Text = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss"); };
             _stopwatch.Start();
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private void LoadNewGame()
         {
-            MazeGenerator generator = new MazeGenerator();
-            _maze = generator.GenerateNewMaze();
-            for (int row = 0; row < _maze.GetLength(0); row++)
-            {
-                MazeGrid.RowDefinitions.Add(new RowDefinition());
-                for (int column = 0; column < _maze.GetLength(1); column++)
-                {
-                    if (row == 0)
-                    {
-                        MazeGrid.ColumnDefinitions.Add(new ColumnDefinition());
-                    }
-
-                    CreateMazeItem(column, row);
-                }
-            }
-
+            LoadNewMap();
             CreatePlayer();
+            InitializeMobility();
+            MazeCanvas.Focusable = true;
+            MazeCanvas.Focus();
         }
 
-
-
-        private void CreateMazeItem(int column, int row)
+        private void InitializeMobility()
         {
+            _motionTimer.Interval = TimeSpan.FromMilliseconds(15);
+            _motionTimer.IsEnabled = true;
+            _motionTimer.Tick += MotionLoop;
+            _motionTimer.Start();
+        }
+
+        private void LoadNewMap()
+        {
+            MazeGenerator generator = new();
+            _maze = generator.GenerateNewMaze();
+            AddExternalWalls();
+
+            int blockTop = 0;
+            for (int row = 0; row < _maze.GetLength(0); row++)
+            {
+                int blockleft = 0;
+                for (int column = 0; column < _maze.GetLength(1); column++)
+                {
+                    CreateMazeItem(column, row, blockleft, blockTop);
+                    blockleft += MazeBlockSize;
+                }
+
+                blockTop += MazeBlockSize;
+            }
+        }
+
+        private void CreateMazeItem(int column, int row, int blockeft, int blockTop)
+        {
+            Rectangle rect = new();
+            rect.Width = rect.Height = MazeBlockSize;
             BitmapImage mazeImage;
-            Canvas canvas = new();
-            if (_maze[row, column])
+            if (_maze[column, row])
             {
                 mazeImage = new(new Uri(@"Images\Ground.png", UriKind.Relative));
-                canvas.Tag = "Ground";
             }
             else
             {
                 mazeImage = new(new Uri(@"Images\Wall.png", UriKind.Relative));
-                canvas.Tag = "Wall";
+                TryAddInternalWall(column, row);
             }
 
             ImageBrush myImageBrush = new(mazeImage);
-            canvas.Background = myImageBrush;
-            AddUiElementToGreed(canvas, row, column);
+            rect.Fill = myImageBrush;
+            AddUiElementToCanvas(rect, blockeft, blockTop);
+        }
+
+        private void AddExternalWalls()
+        {
+            _walls.Add(new Rect(0, 0, MazeBlockSize * MazeSize, MazeBlockSize));
+            _walls.Add(new Rect(0, MazeBlockSize, MazeBlockSize, MazeBlockSize * (MazeSize - 2)));
+            _walls.Add(new Rect((MazeBlockSize * MazeSize) - 1, MazeBlockSize, MazeBlockSize, MazeBlockSize * (MazeSize - 2)));
+            _walls.Add(new Rect(0, (MazeBlockSize * MazeSize) - 1, MazeBlockSize * MazeSize, MazeBlockSize));
+        }
+
+        private void TryAddInternalWall(int column, int row)
+        {
+            if (0 < column && column < MazeSize && 0 < row && row < MazeSize)
+            {
+                _walls.Add(new Rect(
+                    column * MazeBlockSize,
+                    row * MazeBlockSize,
+                    MazeBlockSize,
+                    MazeBlockSize));
+            }
         }
 
         private void CreatePlayer()
         {
-            BitmapImage playerImage = new(new Uri(@"Images\PlayerRight.png", UriKind.Relative));    
-            ImageBrush myImageBrush = new(playerImage);
-            _player.Height = 30;
-            _player.Width = 30;
-            _player.Stroke = myImageBrush;
-            AddUiElementToGreed(_player, 1, 1);
+            AddUiElementToCanvas(_player.Image, MazeBlockSize + 2, MazeBlockSize + 2);
         }
 
-        private void AddUiElementToGreed(UIElement uIElement, int row, int column)
+        private void AddUiElementToCanvas(UIElement uIElement, int left, int top)
         {
-            Grid.SetRow(uIElement, row);
-            Grid.SetColumn(uIElement, column);
-            MazeGrid.Children.Add(uIElement);
+            Canvas.SetLeft(uIElement, left);
+            Canvas.SetTop(uIElement, top);
+            MazeCanvas.Children.Add(uIElement);
         }
     }
 }

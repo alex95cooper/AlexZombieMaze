@@ -5,16 +5,16 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:AlexMaze"
       mc:Ignorable="d" 
-      d:DesignHeight="540" d:DesignWidth="500"
-      Title="MazePage" Loaded="Page_Loaded">
+      d:DesignHeight="560" d:DesignWidth="495"
+      Title="MazePage" >
 
     <Grid x:Name="GamePageGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="40"/>
-            <RowDefinition/>
+            <RowDefinition />
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
+        <StackPanel x:Name="InfoPanel" Grid.Row="0" Orientation="Horizontal">
             <Border Width="220" BorderThickness="5" BorderBrush="ForestGreen">
                 <TextBlock x:Name ="NameBlock" VerticalAlignment="Stretch"
                            FontSize="20" FontWeight="Bold" 
@@ -31,10 +31,6 @@
             </Border>
         </StackPanel>
 
-
-        <Grid x:Name="MazeGrid" Grid.Row="1">
-            <Rectangle x:Name="Player" Width="40" Height="40"></Rectangle>
-        </Grid>
-        
+        <Canvas x:Name="MazeCanvas" Grid.Row="1" KeyDown="MazeCanvas_KeyDown" KeyUp="MazeCanvas_KeyUp"/>
     </Grid>
 </Page>
