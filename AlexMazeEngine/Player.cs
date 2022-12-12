@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -11,34 +8,39 @@ using System.Windows.Media.Imaging;
 
 namespace AlexMazeEngine
 {
-    public class Player
+    public class Player 
     {
-        public const double ImageScale = 0.4;
-        public const double Height = 25;
-        public const double Width = 9;
+        public const double ImageScale = 0.333;
+        public const double Height = 21;
+        public const double Width = 8;
+        public const int StepCount = 7;
         public const int Speed = 1;
+        public const int StopDistance = 1;
 
-        private bool _isStep;
-        private int _moveDirection;
-        private int _playersLook;
-        private int _step;
-
-
+        private string ImagePath;
+        internal int _playersLook;
+        internal int _moveDirection;
+        internal int _stepCounter;
 
         public Player(string imagepath)
         {
-            BitmapImage playerImage = new(new Uri(imagepath, UriKind.Relative));
-            TransformedBitmap reducedBitmap = new(playerImage, new ScaleTransform(ImageScale, ImageScale));
-            CroppedBitmap frame = new(reducedBitmap, new Int32Rect(0, 0, (int)Width, (int)Height));
+            ImagePath = imagepath;
             Image = new Image();
+            _playersLook = (int)LookDirection.Right;
+            SetImage(0);
+        }
+
+        public Image Image { get; internal set; }
+
+        private void SetImage(int rectX)
+        {
+            BitmapImage playerImage = new(new Uri(ImagePath, UriKind.Relative));
+            TransformedBitmap reducedBitmap = new(playerImage, new ScaleTransform(ImageScale, ImageScale));
+            CroppedBitmap frame = new(reducedBitmap, new Int32Rect(rectX, 0, (int)Width, (int)Height));
             Image.Source = frame;
             Image.Width = frame.Width;
             Image.Height = frame.Height;
         }
-
-        public int Step { get; set; }
-
-        public Image Image { get; set; }
 
         public void SetMove(KeyEventArgs e)
         {
@@ -46,11 +48,11 @@ namespace AlexMazeEngine
             {
                 case Key.Left:
                     _moveDirection = (int)MoveDirection.Left;
-                    _playersLook = (int)PlayersLook.Left;
+                    TryMakeTurn((int)LookDirection.Left);
                     break;
                 case Key.Right:
                     _moveDirection = (int)MoveDirection.Right;
-                    _playersLook = (int)PlayersLook.Right;
+                    TryMakeTurn((int)LookDirection.Right);
                     break;
                 case Key.Up:
                     _moveDirection = (int)MoveDirection.Up;
@@ -78,13 +80,11 @@ namespace AlexMazeEngine
                     Canvas.SetTop(Image, Canvas.GetTop(Image) + Speed);
                     break;
             }
-
-
         }
 
         public void TryMove(List<Rect> walls)
         {
-            Rect playerHitBox = new(Canvas.GetLeft(Image), Canvas.GetTop(Image), Player.Width, Player.Height);
+            Rect playerHitBox = new(Canvas.GetLeft(Image), Canvas.GetTop(Image), Width, Height);
             foreach (var block in walls)
             {
                 if (playerHitBox.IntersectsWith(block))
@@ -92,16 +92,16 @@ namespace AlexMazeEngine
                     switch (_moveDirection)
                     {
                         case (int)MoveDirection.Left:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + 2);
+                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + (Speed + StopDistance));
                             break;
                         case (int)MoveDirection.Right:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - 2);
+                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - (Speed + StopDistance));
                             break;
                         case (int)MoveDirection.Up:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) + 2);
+                            Canvas.SetTop(Image, Canvas.GetTop(Image) + (Speed + StopDistance));
                             break;
                         case (int)MoveDirection.Down:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) - 2);
+                            Canvas.SetTop(Image, Canvas.GetTop(Image) - (Speed + StopDistance));
                             break;
                     }
 
@@ -113,16 +113,27 @@ namespace AlexMazeEngine
         public void Stop()
         {
             _moveDirection = (int)MoveDirection.None;
-            _isStep = false;
         }
 
-        public void Steps()
+        public void Step()
         {
-            _step = _step + 1;
-
-
+            _stepCounter++;
+            SetImage((int)Width * _stepCounter);
+            _stepCounter = (_stepCounter == StepCount) ? 0 : _stepCounter;
         }
 
-
+        private void TryMakeTurn(int playerLook)
+        {
+            if (playerLook == (int)LookDirection.Left && _playersLook != (int)LookDirection.Left)
+            {
+                _playersLook = (int)LookDirection.Left;
+                Image.FlowDirection = FlowDirection.RightToLeft;
+            }
+            else if (playerLook == (int)LookDirection.Right && _playersLook != (int)LookDirection.Right)
+            {
+                _playersLook = (int)LookDirection.Right;
+                Image.FlowDirection = FlowDirection.LeftToRight;
+            }
+        }
     }
 }

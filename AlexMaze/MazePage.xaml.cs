@@ -31,13 +31,18 @@ namespace AlexMaze
 
         private bool[,] _maze;
         private Player _player;
-
+        private Zombie _zombie1;
+        private Zombie? _zombie2;
+        private bool _playerIsStep;
         private int _score;
 
         public MazePage(string playerName)
         {
             InitializeComponent();
-            _player = new(@"Images\PlayerRight.png");
+            _player = new(@"Images\Player.png");
+            (List<string>, List<string>) zombieMotions = GetZombiekMotions();
+            _zombie1 = new(zombieMotions.Item1, zombieMotions.Item2);
+            _zombie2 = null;
             _maze = new bool[MazeSize, MazeSize];
             NameBlock.Text = " " + playerName;
             DisplayGameTime();
@@ -47,17 +52,44 @@ namespace AlexMaze
 
         private void MazeCanvas_KeyDown(object sender, KeyEventArgs e)
         {
-            _player.SetMove(e);
+            if (KeyIsArrow(e))
+            {
+                _player.SetMove(e);
+                _playerIsStep = true;
+            }
         }
 
         private void MazeCanvas_KeyUp(object sender, KeyEventArgs e)
         {
-            _player.Stop();
+            if (KeyIsArrow(e))
+            {
+                _player.Stop();
+                _playerIsStep = false;
+            }
         }
+
+        private static bool KeyIsArrow(KeyEventArgs e)
+        {
+            return e.Key == Key.Left || e.Key == Key.Right ||
+                e.Key == Key.Up || e.Key == Key.Down;
+        }
+
         private void MotionLoop(object? sender, EventArgs e)
         {
+            if (_playerIsStep)
+            {
+                _player.Step();
+            }
+
+
+
             _player.Move();
             _player.TryMove(_walls);
+
+            _zombie1.Step();
+            _zombie1.Move();
+            _zombie1.TryMove(_walls);
+
 
         }
 
@@ -74,6 +106,7 @@ namespace AlexMaze
         {
             LoadNewMap();
             CreatePlayer();
+            CreateZombie();
             InitializeMobility();
             MazeCanvas.Focusable = true;
             MazeCanvas.Focus();
@@ -149,7 +182,32 @@ namespace AlexMaze
 
         private void CreatePlayer()
         {
-            AddUiElementToCanvas(_player.Image, MazeBlockSize + 2, MazeBlockSize + 2);
+            AddUiElementToCanvas(_player.Image, 
+                MazeBlockSize + Player.StopDistance, 
+                MazeBlockSize + Player.StopDistance);
+        }
+
+        private void CreateZombie()
+        {
+            AddUiElementToCanvas(_zombie1.Image, (MazeBlockSize * 9) + 1, (MazeBlockSize * 9) + 1);
+            _zombie1.SetMove();
+        }
+
+        private (List<string>, List<string>) GetZombiekMotions()
+        {
+            List<string> imagesWalk = new();
+            for (int i = 1; i < 11; i++)
+            {
+                imagesWalk.Add($@"Images\Zombie Walk\go_{i}.png");
+            }
+
+            List<string> imagesAttack = new();
+            for (int i = 1; i < 11; i++)
+            {
+                imagesWalk.Add($@"Images\\Zombie Attack\hit_{i}.png");
+            }
+
+            return (imagesWalk, imagesAttack);
         }
 
         private void AddUiElementToCanvas(UIElement uIElement, int left, int top)
