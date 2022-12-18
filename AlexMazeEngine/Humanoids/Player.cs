@@ -8,33 +8,34 @@ using System.Windows.Media.Imaging;
 
 namespace AlexMazeEngine
 {
-    public class Player 
+    public class Player : IHumanoid
     {
-        public const double ImageScale = 0.333;
-        public const double Height = 21;
-        public const double Width = 8;
+        public const double ImageScale = 0.5;
+        public const double Height = 32;
+        public const double Width = 12;
         public const int StepCount = 7;
-        public const int Speed = 1;
-        public const int StopDistance = 1;
+        public const int Speed = 2;
+        public const int DistanceToWall = 1;
 
-        private string ImagePath;
-        internal int _playersLook;
-        internal int _moveDirection;
-        internal int _stepCounter;
+        private readonly string _imagePath;
+
+        private int _playersLook;
+        private int _moveDirection;
+        private int _stepCounter;
 
         public Player(string imagepath)
         {
-            ImagePath = imagepath;
+            _imagePath = imagepath;
             Image = new Image();
             _playersLook = (int)LookDirection.Right;
             SetImage(0);
         }
 
-        public Image Image { get; internal set; }
+        public Image Image { get; }
 
         private void SetImage(int rectX)
         {
-            BitmapImage playerImage = new(new Uri(ImagePath, UriKind.Relative));
+            BitmapImage playerImage = new(new Uri(_imagePath, UriKind.Relative));
             TransformedBitmap reducedBitmap = new(playerImage, new ScaleTransform(ImageScale, ImageScale));
             CroppedBitmap frame = new(reducedBitmap, new Int32Rect(rectX, 0, (int)Width, (int)Height));
             Image.Source = frame;
@@ -92,16 +93,16 @@ namespace AlexMazeEngine
                     switch (_moveDirection)
                     {
                         case (int)MoveDirection.Left:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + (Speed + StopDistance));
+                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + (Speed + DistanceToWall));
                             break;
                         case (int)MoveDirection.Right:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - (Speed + StopDistance));
+                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - (Speed + DistanceToWall));
                             break;
                         case (int)MoveDirection.Up:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) + (Speed + StopDistance));
+                            Canvas.SetTop(Image, Canvas.GetTop(Image) + (Speed + DistanceToWall));
                             break;
                         case (int)MoveDirection.Down:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) - (Speed + StopDistance));
+                            Canvas.SetTop(Image, Canvas.GetTop(Image) - (Speed + DistanceToWall));
                             break;
                     }
 
@@ -110,9 +111,28 @@ namespace AlexMazeEngine
             }
         }
 
+        public bool TryTakeCoin(List<Coin> coins, out Coin deletedCoin)
+        {
+            deletedCoin = default;
+            Rect playerHitBox = new(Canvas.GetLeft(Image), Canvas.GetTop(Image), Width, Height);
+            foreach (var coin in coins)
+            {
+                Rect CoinTakeBox = new(Canvas.GetLeft(coin.Image), Canvas.GetTop(coin.Image), Coin.Width, Coin.Height);
+                if (playerHitBox.IntersectsWith(CoinTakeBox))
+                {
+                    deletedCoin = coin;
+                    coins.Remove(coin);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public void Stop()
         {
             _moveDirection = (int)MoveDirection.None;
+            SetImage(0);
         }
 
         public void Step()

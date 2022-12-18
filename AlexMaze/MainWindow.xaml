@@ -4,7 +4,56 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="AlexZombieMaze" Height="560" Width="495" ResizeMode="CanMinimize">
+        Title="AlexZombieMaze" Height="620" Width="550" ResizeMode="CanMinimize" Closing="Window_Closing" PreviewKeyDown="Window_PreviewKeyDown" PreviewKeyUp="Window_PreviewKeyUp">
+
+    <Grid Background ="LightGray">
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="170"/>
+            <RowDefinition Height="170"/>
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Vertical"  Grid.Row="0" Width=" 250">
+            <Rectangle Height="10"/>
+            <TextBlock Height="35" FontSize="28" Text="Enter your name:   " HorizontalAlignment="Center"/>
+            <Rectangle Height="10"/>
+            <TextBox x:Name="NameTextBox" Height="50" Width="250" FontSize="32" MaxLength="15"/>
+            <Rectangle Height="15"/>
+            <Button x:Name="NewGameButton" Grid.Row="0" Content="New Game" Height="50" Width="250" FontSize="26" Click="NewGameButton_Click"/>
+            <Rectangle Height="15"/>
+            <Button x:Name="StatisticButton" Grid.Row="0" Content="Statistic" Height="50" Width="250" FontSize="26" Click="StatisticButton_Click"/>
+        </StackPanel>
+
+        <DataGrid x:Name="dataGridResult" Grid.Row="1" Grid.RowSpan="2" Visibility="Collapsed" AutoGenerateColumns="False" IsReadOnly="True">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" x:Name="playerNameColumn" Binding="{Binding Path=Element[PlayerName].Value}"/>
+                <DataGridTextColumn Header="Quantity of coins" x:Name="coinsCountColumn" Binding="{Binding Path=Element[Score].Value}"/>
+                <DataGridTextColumn Header="Game Time" x:Name="timeInGameColumn" Binding="{Binding Path=Element[TimeInMaze].Value}"/>
+                <DataGridTextColumn Header="Reason for ending the game" x:Name="finishCausedColumn" Binding="{Binding Path=Element[CauseOfFinish].Value}"/>
+                <DataGridTextColumn Header="Launch date      " x:Name="launchDateColumn" Binding="{Binding Path=Element[GameDate].Value}" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <StackPanel x:Name="MazePanel" Orientation="Vertical" Visibility="Collapsed" Grid.Row="0" Grid.RowSpan="3">
+            <StackPanel x:Name="InfoPanel" Height="40" Orientation="Horizontal">
+                <Border Width="250" BorderThickness="5" BorderBrush="ForestGreen">
+                    <TextBlock x:Name ="NameBlock" VerticalAlignment="Stretch"
+                           FontSize="20" FontWeight="Bold" 
+                           Foreground="ForestGreen"/>
+                </Border>
+                <Border Width="160" BorderThickness="5" BorderBrush="Orange">
+                    <TextBlock x:Name="ScoreBlock" Text="  Coins :" VerticalAlignment="Stretch" FontSize="20"
+                           FontWeight="Bold" Foreground ="Orange"/>
+                </Border>
+                <Border Width="125" BorderThickness="5" BorderBrush="YellowGreen">
+                    <TextBlock x:Name ="TimeBlock"  Text="00:00:00" 
+                           VerticalAlignment="Stretch" 
+                           FontSize="20" FontWeight="Bold" 
+                           Foreground="YellowGreen" HorizontalAlignment="Center" />
+                </Border>
+            </StackPanel>
+            <Canvas x:Name="MazeCanvas" Height="580"/>
+        </StackPanel>
+    </Grid>
     
-    <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden" Focusable="False" KeyDown="MainFrame_KeyDown"/>
+
 </Window>

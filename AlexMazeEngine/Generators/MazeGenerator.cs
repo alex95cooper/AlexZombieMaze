@@ -59,32 +59,32 @@ namespace AlexMazeEngine
             }
         }
 
-        private static Point GetRandomPoint(int pillarIndex)
+        private Point GetRandomPoint(int pillarIndex)
         {
             Random random = new();
-            int halfMazeSize = SmallMazeSize / 2;
-            int column;
-            int row;
+            int halfColunmSize = _maze.GetLength(0) / 2;
+            int halfRowSize = _maze.GetLength(1) / 2;
+            int column, row;
 
-            if (pillarIndex < 2)
+            if (pillarIndex < PillarQuantity * 0.25)
             {
-                column = random.Next(halfMazeSize);
-                row = random.Next(halfMazeSize);
+                column = random.Next(halfColunmSize);
+                row = random.Next(halfRowSize);
             }
-            else if (pillarIndex < 4)
+            else if (pillarIndex < PillarQuantity * 0.5)
             {
-                column = random.Next(halfMazeSize);
-                row = random.Next(halfMazeSize, SmallMazeSize);
+                column = random.Next(halfColunmSize);
+                row = random.Next(halfRowSize, SmallMazeSize);
             }
-            else if (pillarIndex < 6)
+            else if (pillarIndex < PillarQuantity * 0.75)
             {
-                column = random.Next(halfMazeSize, SmallMazeSize);
-                row = random.Next(halfMazeSize);
+                column = random.Next(halfColunmSize, SmallMazeSize);
+                row = random.Next(halfRowSize);
             }
             else
             {
-                column = random.Next(halfMazeSize, SmallMazeSize);
-                row = random.Next(halfMazeSize, SmallMazeSize);
+                column = random.Next(halfColunmSize, SmallMazeSize);
+                row = random.Next(halfRowSize, SmallMazeSize);
             }
 
             return new(row, column);
@@ -94,7 +94,7 @@ namespace AlexMazeEngine
         {
             foreach (var pillar in _pillars)
             {
-                if (point.X == pillar.X && point.Y == pillar.Y)
+                if (point.Y == pillar.Y&& point.X == pillar.X)
                 {
                     return true;
                 }
@@ -394,11 +394,11 @@ namespace AlexMazeEngine
         private bool[,] AddExternalWalls()
         {
             bool[,] _largeMaze = new bool[LargeMazeSize, LargeMazeSize];
-            for (int i = 0; i < SmallMazeSize; i++)
+            for (int column = 0; column < SmallMazeSize; column++)
             {
-                for (int j = 0; j < SmallMazeSize; j++)
+                for (int row = 0; row < SmallMazeSize; row++)
                 {
-                    _largeMaze[i + 1, j + 1] = _maze[i, j];
+                    _largeMaze[column + 1, row + 1] = _maze[column, row];
                 }
             }
 
