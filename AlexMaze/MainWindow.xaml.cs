@@ -4,25 +4,21 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shapes;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Threading;
-using AlexMazeEngine;
 using System.Threading.Tasks;
 using AlexMazeEngine.Generators;
-using System.ComponentModel;
 using System.Xml.Linq;
 using System.Linq;
+using AlexMazeEngine;
 
 namespace AlexMaze
 {
     public partial class MainWindow : Window
     {
-        private const string resultFile = "result.xml";
+        private const string resultFile = "Result.xml";
         private const int CoinsQuantity = 10;
         private const int MazeBlockSize = 50;
         private const int MazeSize = 11;
@@ -32,13 +28,14 @@ namespace AlexMaze
         private readonly DispatcherTimer _motionTimer = new();
         private readonly DispatcherTimer _coinAddTimer = new();
         private readonly Stopwatch _stopwatch = new();
-        private readonly GameInfo _gameInfo = new();
+
         private readonly List<Rect> _walls = new();
         private readonly List<Coin> _coins = new();
         private readonly List<Zombie> _zombies = new();
 
         private bool[,] _maze = new bool[MazeSize, MazeSize];
         private Player _player = default;
+        private GameInfo _gameInfo;
         private int _score;
         private bool _playerIsStep;
         private bool _zombieIsHunt;
@@ -48,13 +45,16 @@ namespace AlexMaze
         public MainWindow()
         {
             InitializeComponent();
+            XDocument doc = XDocument.Load(resultFile);
+            List<XElement> list = doc.Root.Elements().ToList();
+            NameTextBox.Text = list[0].Element("PlayerName").Value;
         }
-
-
 
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
         {
+            _gameInfo = new(NameTextBox.Text);
             MazePanel.Visibility = Visibility.Visible;
+            MenuPanel.Visibility = Visibility.Collapsed;
             NameBlock.Text = NameTextBox.Text;
             LoadNewGame();
         }
@@ -73,7 +73,11 @@ namespace AlexMaze
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (KeyIsArrow(e))
+            if (e.Key == Key.Escape)
+            {
+                FinishGame();
+            }
+            else if (KeyIsArrow(e))
             {
                 _player.SetMove(e);
                 _playerIsStep = true;
@@ -89,14 +93,14 @@ namespace AlexMaze
             }
         }
 
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            _gameInfo.SetCauseOfFinish(_playerIsDead);
-            _gameInfo.Serialize(resultFile);
+            if (MazePanel.Visibility == Visibility.Visible)
+            {
+                _gameInfo.SetLastInfo(_score, TimeBlock.Text, _playerIsDead);
+                _gameInfo.Serialize(resultFile);
+            }
         }
-
-
 
         private void MotionLoop(object sender, EventArgs e)
         {
@@ -109,13 +113,10 @@ namespace AlexMaze
             if (_playerIsCaught == false)
             {
                 TryTakeCoin();
-
                 _player.Move();
                 _player.TryMove(_walls);
-
-
                 ZombieMove();
-                if (_score == 2 && _zombies.Count == 1)
+                if (_score == 10 && _zombies.Count == 1)
                 {
                     CreateZombie(1);
                 }
@@ -185,13 +186,13 @@ namespace AlexMaze
             _gameTimer.Interval = new(0, 0, 1);
             _gameTimer.IsEnabled = true;
             await Task.Delay(10);
-            _gameTimer.Tick += (obj, e) => { TimeBlock.Text = _stopwatch.Elapsed.ToString(@"hh\:mm\:ss"); };
+            _gameTimer.Tick += (obj, e) => { TimeBlock.Text = "    " + _stopwatch.Elapsed.ToString(@"hh\:mm\:ss"); };
             _stopwatch.Start();
         }
 
         private void InitializeMobility()
         {
-            _motionTimer.Interval = TimeSpan.FromMilliseconds(20);
+            _motionTimer.Interval = TimeSpan.FromMilliseconds(17);
             _motionTimer.IsEnabled = true;
             _motionTimer.Tick += MotionLoop;
             _motionTimer.Start();
@@ -270,7 +271,7 @@ namespace AlexMaze
         private void CreatePlayer()
         {
             _player = new(@"Images\Player.png");
-            System.Drawing.Point playerPosition = PositionGenerator.GetPlayerPosition(_maze);
+            System.Drawing.Point playerPosition = StartPositionGenerator.GetPlayerPosition(_maze);
             AddUiElementToCanvas(_player.Image,
                 playerPosition.X * MazeBlockSize + Player.DistanceToWall,
                 playerPosition.Y * MazeBlockSize + Player.DistanceToWall);
@@ -280,8 +281,8 @@ namespace AlexMaze
         {
             _zombies.Add(new(GetZombieImages().Item1, GetZombieImages().Item2));
             System.Drawing.Point zombiePosition = (zombieNumber == 0) ?
-                PositionGenerator.GetFirstZombiePosition(_maze) :
-                PositionGenerator.GetSecondZombiePosition(_maze);
+                StartPositionGenerator.GetFirstZombiePosition(_maze) :
+                StartPositionGenerator.GetSecondZombiePosition(_maze);
             AddUiElementToCanvas(_zombies[zombieNumber].Image,
                 zombiePosition.X * MazeBlockSize + Zombie.DistanceToWall,
                 zombiePosition.Y * MazeBlockSize + Zombie.DistanceToWall);
@@ -290,7 +291,7 @@ namespace AlexMaze
 
         private void CreateCoins()
         {
-            List<System.Drawing.Point> coinPositions = PositionGenerator.GetCoinsPositions(_maze, CoinsQuantity);
+            List<System.Drawing.Point> coinPositions = StartPositionGenerator.GetCoinsPositions(_maze, CoinsQuantity);
             for (int i = 0; i < coinPositions.Count; i++)
             {
                 _coins.Add(new(GetCoinImages()));
@@ -303,7 +304,7 @@ namespace AlexMaze
 
         private void CreateAnotherCoin()
         {
-            System.Drawing.Point coinPosition = PositionGenerator.GetNewCoinPosition(_maze, _coins);
+            System.Drawing.Point coinPosition = StartPositionGenerator.GetNewCoinPosition(_maze, _coins);
             _coins.Add(new(GetCoinImages()));
             _coins[^1].Position = coinPosition;
             AddUiElementToCanvas(_coins[^1].Image,
@@ -359,7 +360,7 @@ namespace AlexMaze
                 _coins.Remove(deletedCoin);
                 MazeCanvas.Children.Remove(deletedCoin.Image);
                 _score++;
-                if (_score >= 5)
+                if (_score >= 30)
                 {
                     _zombieIsHunt = true;
                     foreach (Zombie zombie in _zombies)
@@ -374,26 +375,33 @@ namespace AlexMaze
         {
             foreach (Zombie zombie in _zombies)
             {
-                zombie.Move();
-                _playerIsCaught = (!_playerIsCaught) && zombie.TryCatchPlayer(_player);
+                _playerIsCaught = _playerIsCaught == true || zombie.TryCatchPlayer(_player);
                 if (_zombieIsHunt)
                 {
                     int direction = PathGenerator.GetDirection(_maze, zombie, _player);
                     zombie.Hunt(direction);
+                    zombie.Move();
                     zombie.TryMoveWithHunt(_walls);
+
                 }
                 else
                 {
+                    zombie.Move();
                     zombie.TryMove(_walls);
-                }
+                }             
             }
         }
 
         private void FinishGame()
-        {
-            _gameInfo.SetCauseOfFinish(_playerIsDead);
-            _gameInfo.Serialize(resultFile);
-            MazePanel.Visibility = Visibility.Collapsed;
+        {           
+            _gameTimer.Stop();
+            _coinAddTimer.Stop();
+            _animationTimer.Stop();
+            _motionTimer.Stop();
+            MainWindow newWindow = new();
+            Application.Current.MainWindow = newWindow;           
+            newWindow.Show();
+            this.Close();
         }
     }
 }

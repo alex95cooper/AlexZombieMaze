@@ -31,7 +31,6 @@ namespace AlexMazeEngine
         }
 
         public Image Image { get; internal set; }
-
         public Point Position { get; set; }
 
         private void SetImage(string imagePath)
@@ -51,4 +50,3 @@ namespace AlexMazeEngine
         }
     }
 }
-

@@ -31,6 +31,37 @@ namespace AlexMazeEngine
             return _maze;
         }
 
+        public static Point GetRandomPoint(bool[,] maze, int elementQuantity, int elementIndex)
+        {
+            Random random = new();
+            int halfColunmSize = maze.GetLength(0) / 2;
+            int halfRowSize = maze.GetLength(1) / 2;
+            int column, row;
+
+            if (elementIndex < PillarQuantity * 0.25)
+            {
+                column = random.Next(halfColunmSize);
+                row = random.Next(halfRowSize);
+            }
+            else if (elementIndex < PillarQuantity * 0.5)
+            {
+                column = random.Next(halfColunmSize);
+                row = random.Next(halfRowSize, maze.GetLength(1) - 1);
+            }
+            else if (elementIndex < PillarQuantity * 0.75)
+            {
+                column = random.Next(halfColunmSize, maze.GetLength(0) - 1);
+                row = random.Next(halfRowSize);
+            }
+            else
+            {
+                column = random.Next(halfColunmSize, maze.GetLength(0) - 1);
+                row = random.Next(halfRowSize, maze.GetLength(1) - 1);
+            }
+
+            return new(row, column);
+        }
+
         private void FillMazeWithGround()
         {
             for (int column = 0; column < SmallMazeSize; column++)
@@ -46,7 +77,7 @@ namespace AlexMazeEngine
         {
             for (int index = 0; index < PillarQuantity; index++)
             {
-                Point point = GetRandomPoint(index);
+                Point point = GetRandomPoint(_maze, PillarQuantity, index);
                 if (CheckIfPointRepeat(point) || CheckIfPointInTheCorner(point) || CheckIfPointsContact(point))
                 {
                     index--;
@@ -57,44 +88,13 @@ namespace AlexMazeEngine
                     _pillars.Add(point);
                 }
             }
-        }
-
-        private Point GetRandomPoint(int pillarIndex)
-        {
-            Random random = new();
-            int halfColunmSize = _maze.GetLength(0) / 2;
-            int halfRowSize = _maze.GetLength(1) / 2;
-            int column, row;
-
-            if (pillarIndex < PillarQuantity * 0.25)
-            {
-                column = random.Next(halfColunmSize);
-                row = random.Next(halfRowSize);
-            }
-            else if (pillarIndex < PillarQuantity * 0.5)
-            {
-                column = random.Next(halfColunmSize);
-                row = random.Next(halfRowSize, SmallMazeSize);
-            }
-            else if (pillarIndex < PillarQuantity * 0.75)
-            {
-                column = random.Next(halfColunmSize, SmallMazeSize);
-                row = random.Next(halfRowSize);
-            }
-            else
-            {
-                column = random.Next(halfColunmSize, SmallMazeSize);
-                row = random.Next(halfRowSize, SmallMazeSize);
-            }
-
-            return new(row, column);
-        }
+        }        
 
         private bool CheckIfPointRepeat(Point point)
         {
             foreach (var pillar in _pillars)
             {
-                if (point.Y == pillar.Y&& point.X == pillar.X)
+                if (point.Y == pillar.Y && point.X == pillar.X)
                 {
                     return true;
                 }

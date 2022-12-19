@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="icon.jpg" />
     <None Remove="Images\Coins\Coin1.png" />
     <None Remove="Images\Coins\Coin2.png" />
     <None Remove="Images\Coins\Coin3.png" />
@@ -18,10 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="bin\Release\net6.0-windows\icon.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\AlexMazeEngine\AlexMazeEngine.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="icon.jpg" />
     <Resource Include="Images\Coins\Coin1.png" />
     <Resource Include="Images\Coins\Coin2.png" />
     <Resource Include="Images\Coins\Coin3.png" />
@@ -29,6 +35,10 @@
     <Resource Include="Images\Ground.png" />
     <Resource Include="Images\Player.png" />
     <Resource Include="Images\Wall.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="bin\Debug\net6.0-windows\" />
   </ItemGroup>
 
 </Project>

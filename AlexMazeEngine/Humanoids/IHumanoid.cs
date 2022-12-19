@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -15,8 +11,6 @@ namespace AlexMazeEngine
 
         public Image Image { get; }
 
-        private static void SetImage(int rectX) { }
-
         public void Move() { }
 
         public void TryMove(List<Rect> walls) { }
@@ -24,8 +18,5 @@ namespace AlexMazeEngine
         public void Stop() { }
 
         public void Step() { }
-
-        private static void TryMakeTurn(int playerLook) { }
-
     }
 }

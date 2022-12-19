@@ -12,6 +12,7 @@ namespace AlexMazeEngine
         public const double ImageScale = 0.5;
         public const double Height = 32;
         public const double Width = 20;
+        public const double Acceleration = 0.05;
         public const double MinSpeed = 0.5;
         public const double MaxSpeed = 10;
         public const int AttackCount = 7;
@@ -104,6 +105,7 @@ namespace AlexMazeEngine
 
         public void TryMoveWithHunt(List<Rect> walls)
         {
+            double retreatFromTheWall = _speed + MinSpeed + DistanceToWall;
             Rect zombieHitBox = new(Canvas.GetLeft(Image), Canvas.GetTop(Image), Width, Height);
             foreach (var block in walls)
             {
@@ -112,16 +114,16 @@ namespace AlexMazeEngine
                     switch (_moveDirection)
                     {
                         case (int)MoveDirection.Left:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + (_speed + DistanceToWall));
+                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + retreatFromTheWall);
                             break;
                         case (int)MoveDirection.Right:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - (_speed + DistanceToWall));
+                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - retreatFromTheWall);
                             break;
                         case (int)MoveDirection.Up:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) + (_speed + DistanceToWall));
+                            Canvas.SetTop(Image, Canvas.GetTop(Image) + retreatFromTheWall);
                             break;
                         case (int)MoveDirection.Down:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) - (_speed + DistanceToWall));
+                            Canvas.SetTop(Image, Canvas.GetTop(Image) - retreatFromTheWall);
                             break;
                     }
 
@@ -149,6 +151,7 @@ namespace AlexMazeEngine
 
         public bool Attack()
         {
+            _attackCounter = (_attackCounter == 7) ? 0 : _attackCounter;
             SetImage(_imagesAttack[_attackCounter]);
             _attackCounter++;
             return _attackCounter > AttackCount - 1;
@@ -171,7 +174,7 @@ namespace AlexMazeEngine
         {
             if (_speed < MaxSpeed)
             {
-                _speed += _speed * 0.05;
+                _speed += _speed * Acceleration;
             }
         }
 
@@ -216,10 +219,6 @@ namespace AlexMazeEngine
                     Canvas.SetTop(Image, Canvas.GetTop(Image) + (_speed + acceleration));
                     break;
             }
-
         }
-
-
     }
 }
-

@@ -1,23 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AlexMazeEngine
 {
-    public class PositionGenerator
+    public class StartPositionGenerator
     {
-        private readonly bool[,] _maze;
-
-        PositionGenerator(bool[,] maze)
-        {
-            _maze = maze;
-        }
-
-        public static int CoinsQuantity => 10;
-
         public static Point GetPlayerPosition(bool[,] maze)
         {
             for (int i = 0; i < maze.GetLength(0); i++)
@@ -71,7 +59,7 @@ namespace AlexMazeEngine
             List<Point> coinPositions = new();
             for (int index = 0; index < coinsQuantity; index++)
             {
-                Point point = GetRandomPoint(maze, coinsQuantity, index);
+                Point point = MazeGenerator.GetRandomPoint(maze, coinsQuantity, index);
                 if (CheckIfPointRepeat(point, coinPositions) || maze[point.Y, point.X] == false)
                 {
                     index--;
@@ -107,37 +95,6 @@ namespace AlexMazeEngine
             return point;
         }
 
-        private static Point GetRandomPoint(bool[,] maze, int coinsQuantity, int coinIndex)
-        {
-            Random random = new();
-            int halfColunmSize = maze.GetLength(0) / 2;
-            int halfRowSize = maze.GetLength(1) / 2;
-            int column, row;
-
-            if (coinIndex < (int)(coinsQuantity * 0.25))
-            {
-                column = random.Next(1, halfColunmSize);
-                row = random.Next(1, halfRowSize);
-            }
-            else if (coinIndex < (int)(coinsQuantity * 0.5))
-            {
-                column = random.Next(1, halfColunmSize);
-                row = random.Next(halfRowSize, maze.GetLength(0) - 2);
-            }
-            else if (coinIndex < (int)(coinsQuantity * 0.75))
-            {
-                column = random.Next(halfColunmSize, maze.GetLength(0) - 2);
-                row = random.Next(1, halfRowSize);
-            }
-            else
-            {
-                column = random.Next(halfColunmSize, maze.GetLength(0) - 2);
-                row = random.Next(halfRowSize, maze.GetLength(0));
-            }
-
-            return new(row, column);
-        }
-
         private static bool CheckIfPointRepeat(Point point, List<Point> coinPositions)
         {
             foreach (var coinPosition in coinPositions)
@@ -150,6 +107,5 @@ namespace AlexMazeEngine
 
             return false;
         }
-
     }
 }
