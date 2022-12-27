@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Drawing;
 using System.Windows.Controls;
 
 namespace AlexMazeEngine.Generators
@@ -12,11 +13,12 @@ namespace AlexMazeEngine.Generators
 
         public static int GetDirection(bool[,] maze, Zombie zombie, Player player)
         {
-            System.Drawing.Point start = ToPoint(zombie.Image);
-            System.Drawing.Point target = ToPoint(player.Image);
+            System.Drawing.Point start = ToPoint(zombie);
+            System.Drawing.Point target = ToPoint(player);
             int[,] intMaze = ToIntArray(maze);
             intMaze = DrawPath(intMaze, start, target);
-            return GenerateDirection(intMaze, start, target);
+            return (CheckIfTargetBeside(intMaze, start, target, zombie, player, out int direction)) ? 
+                direction : GenerateDirection(intMaze, start);
         }
 
         public static int[,] DrawPath(int[,] maze, System.Drawing.Point start, System.Drawing.Point target)
@@ -50,7 +52,23 @@ namespace AlexMazeEngine.Generators
             return maze;
         }
 
-        private static int GenerateDirection(int[,] maze, System.Drawing.Point start, System.Drawing.Point target)
+        private static bool CheckIfTargetBeside(int[,] maze, System.Drawing.Point start, System.Drawing.Point target, Zombie zombie, Player player, out int direction)
+        {
+            direction = (int)MoveDirection.None;
+            if (maze[start.Y, start.X] == maze[target.Y, target.X])
+            {
+                if ((int)Canvas.GetTop(zombie.Image) == (int)Canvas.GetTop(player.Image))
+                {
+                    direction = (Canvas.GetLeft(zombie.Image) > Canvas.GetLeft(player.Image)) ? (int)MoveDirection.Left : (int)MoveDirection.Right;
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private static int GenerateDirection(int[,] maze, System.Drawing.Point start)
         {
             int direction = 0;
             int rightWay = maze[start.Y, start.X] - 1;
@@ -70,18 +88,23 @@ namespace AlexMazeEngine.Generators
             {
                 direction = (int)MoveDirection.Down;
             }
-            else if (maze[start.Y, start.X] == maze[target.Y, target.X])
-            {
-                direction = (int)MoveDirection.None;
-            }
 
             return direction;
         }
 
-        private static System.Drawing.Point ToPoint(UIElement uIElement)
+        private static System.Drawing.Point ToPoint(Zombie zombie)
         {
-            int column = (int)(Canvas.GetTop(uIElement) / MazeBlockSize);
-            int row = (int)(Canvas.GetLeft(uIElement) / MazeBlockSize);
+            int column = (zombie.MoveDirection == (int)MoveDirection.Up) ?
+               (int)((Canvas.GetTop(zombie.Image) + Zombie.Height) / MazeBlockSize) : (int)(Canvas.GetTop(zombie.Image) / MazeBlockSize);
+            int row = (zombie.MoveDirection == (int)MoveDirection.Left) ?
+                (int)((Canvas.GetLeft(zombie.Image) + Zombie.Width) / MazeBlockSize) : (int)(Canvas.GetLeft(zombie.Image) / MazeBlockSize);
+            return new(row, column);
+        }
+
+        private static System.Drawing.Point ToPoint(Player player)
+        {
+            int column = (int)(Canvas.GetTop(player.Image) / MazeBlockSize);
+            int row = (int)(Canvas.GetLeft(player.Image) / MazeBlockSize);
             return new(row, column);
         }
 

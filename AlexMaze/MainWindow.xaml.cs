@@ -22,6 +22,8 @@ namespace AlexMaze
         private const int CoinsQuantity = 10;
         private const int MazeBlockSize = 50;
         private const int MazeSize = 11;
+        private const int MiddleLevelCoins = 10;
+        private const int HardLevelCoins = 30;
 
         private readonly DispatcherTimer _gameTimer = new();
         private readonly DispatcherTimer _animationTimer = new();
@@ -34,7 +36,7 @@ namespace AlexMaze
         private readonly List<Zombie> _zombies = new();
 
         private bool[,] _maze = new bool[MazeSize, MazeSize];
-        private Player _player = default;
+        private Player _player;
         private GameInfo _gameInfo;
         private int _score;
         private bool _playerIsStep;
@@ -77,7 +79,7 @@ namespace AlexMaze
             {
                 FinishGame();
             }
-            else if (KeyIsArrow(e))
+            else if (KeyIsArrow(e) && _player != null)
             {
                 _player.SetMove(e);
                 _playerIsStep = true;
@@ -116,7 +118,7 @@ namespace AlexMaze
                 _player.Move();
                 _player.TryMove(_walls);
                 ZombieMove();
-                if (_score == 10 && _zombies.Count == 1)
+                if (_score == MiddleLevelCoins && _zombies.Count == 1)
                 {
                     CreateZombie(1);
                 }
@@ -360,7 +362,7 @@ namespace AlexMaze
                 _coins.Remove(deletedCoin);
                 MazeCanvas.Children.Remove(deletedCoin.Image);
                 _score++;
-                if (_score >= 30)
+                if (_score >= HardLevelCoins)
                 {
                     _zombieIsHunt = true;
                     foreach (Zombie zombie in _zombies)
@@ -380,26 +382,21 @@ namespace AlexMaze
                 {
                     int direction = PathGenerator.GetDirection(_maze, zombie, _player);
                     zombie.Hunt(direction);
-                    zombie.Move();
-                    zombie.TryMoveWithHunt(_walls);
-
                 }
-                else
-                {
-                    zombie.Move();
-                    zombie.TryMove(_walls);
-                }             
+
+                zombie.Move();
+                zombie.TryMove(_walls);
             }
         }
 
         private void FinishGame()
-        {           
+        {
             _gameTimer.Stop();
             _coinAddTimer.Stop();
             _animationTimer.Stop();
             _motionTimer.Stop();
             MainWindow newWindow = new();
-            Application.Current.MainWindow = newWindow;           
+            Application.Current.MainWindow = newWindow;
             newWindow.Show();
             this.Close();
         }

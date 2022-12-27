@@ -26,7 +26,6 @@ namespace AlexMazeEngine
         private double _speed;
         private int _zombieLook;
         private int _moveDirection;
-        private int _lastSuccessfulDirection;
         private int _stepCounter;
         private int _attackCounter;
         private bool _zombieWalksHorizontally;
@@ -44,13 +43,15 @@ namespace AlexMazeEngine
         }
         public bool IsAttack { get; private set; }
 
+        public int MoveDirection => _moveDirection;
+
         public Image Image { get; }
 
         public void SetMove()
         {
             Random random = new();
-            int horizontalDirection = random.Next((int)MoveDirection.Left, (int)MoveDirection.Right + 1);
-            int verticalDirection = random.Next((int)MoveDirection.Up, (int)MoveDirection.Down + 1);
+            int horizontalDirection = random.Next((int)AlexMazeEngine.MoveDirection.Left, (int)AlexMazeEngine.MoveDirection.Right + 1);
+            int verticalDirection = random.Next((int)AlexMazeEngine.MoveDirection.Up, (int)AlexMazeEngine.MoveDirection.Down + 1);
             _moveDirection = (_zombieWalksHorizontally) ? horizontalDirection : verticalDirection;
             _zombieWalksHorizontally = !_zombieWalksHorizontally;
             TryMakeTurn(_moveDirection);
@@ -60,16 +61,16 @@ namespace AlexMazeEngine
         {
             switch (_moveDirection)
             {
-                case (int)MoveDirection.Left:
+                case (int)AlexMazeEngine.MoveDirection.Left:
                     Canvas.SetLeft(Image, Canvas.GetLeft(Image) - _speed);
                     break;
-                case (int)MoveDirection.Right:
+                case (int)AlexMazeEngine.MoveDirection.Right:
                     Canvas.SetLeft(Image, Canvas.GetLeft(Image) + _speed);
                     break;
-                case (int)MoveDirection.Up:
+                case (int)AlexMazeEngine.MoveDirection.Up:
                     Canvas.SetTop(Image, Canvas.GetTop(Image) - _speed);
                     break;
-                case (int)MoveDirection.Down:
+                case (int)AlexMazeEngine.MoveDirection.Down:
                     Canvas.SetTop(Image, Canvas.GetTop(Image) + _speed);
                     break;
             }
@@ -84,50 +85,21 @@ namespace AlexMazeEngine
                 {
                     switch (_moveDirection)
                     {
-                        case (int)MoveDirection.Left:
+                        case (int)AlexMazeEngine.MoveDirection.Left:
                             Canvas.SetLeft(Image, Canvas.GetLeft(Image) + (_speed + DistanceToWall));
                             break;
-                        case (int)MoveDirection.Right:
+                        case (int)AlexMazeEngine.MoveDirection.Right:
                             Canvas.SetLeft(Image, Canvas.GetLeft(Image) - (_speed + DistanceToWall));
                             break;
-                        case (int)MoveDirection.Up:
+                        case (int)AlexMazeEngine.MoveDirection.Up:
                             Canvas.SetTop(Image, Canvas.GetTop(Image) + (_speed + DistanceToWall));
                             break;
-                        case (int)MoveDirection.Down:
+                        case (int)AlexMazeEngine.MoveDirection.Down:
                             Canvas.SetTop(Image, Canvas.GetTop(Image) - (_speed + DistanceToWall));
                             break;
                     }
 
                     SetMove();
-                }
-            }
-        }
-
-        public void TryMoveWithHunt(List<Rect> walls)
-        {
-            double retreatFromTheWall = _speed + MinSpeed + DistanceToWall;
-            Rect zombieHitBox = new(Canvas.GetLeft(Image), Canvas.GetTop(Image), Width, Height);
-            foreach (var block in walls)
-            {
-                if (zombieHitBox.IntersectsWith(block))
-                {
-                    switch (_moveDirection)
-                    {
-                        case (int)MoveDirection.Left:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + retreatFromTheWall);
-                            break;
-                        case (int)MoveDirection.Right:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - retreatFromTheWall);
-                            break;
-                        case (int)MoveDirection.Up:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) + retreatFromTheWall);
-                            break;
-                        case (int)MoveDirection.Down:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) - retreatFromTheWall);
-                            break;
-                    }
-
-                    MoveWithHuntAlongWall();
                 }
             }
         }
@@ -143,7 +115,6 @@ namespace AlexMazeEngine
         {
             if (direction != _moveDirection && direction != 0)
             {
-                _lastSuccessfulDirection = _moveDirection;
                 _moveDirection = direction;
                 TryMakeTurn(_moveDirection);
             }
@@ -155,11 +126,6 @@ namespace AlexMazeEngine
             SetImage(_imagesAttack[_attackCounter]);
             _attackCounter++;
             return _attackCounter > AttackCount - 1;
-        }
-
-        public void Stop()
-        {
-            _moveDirection = (int)MoveDirection.None;
         }
 
         public bool TryCatchPlayer(Player player)
@@ -198,26 +164,6 @@ namespace AlexMazeEngine
             {
                 _zombieLook = (int)LookDirection.Right;
                 Image.FlowDirection = FlowDirection.RightToLeft;
-            }
-        }
-
-        private void MoveWithHuntAlongWall()
-        {
-            int acceleration = 3;
-            switch (_lastSuccessfulDirection)
-            {
-                case (int)MoveDirection.Left:
-                    Canvas.SetLeft(Image, Canvas.GetLeft(Image) - (_speed + acceleration));
-                    break;
-                case (int)MoveDirection.Right:
-                    Canvas.SetLeft(Image, Canvas.GetLeft(Image) + (_speed + acceleration));
-                    break;
-                case (int)MoveDirection.Up:
-                    Canvas.SetTop(Image, Canvas.GetTop(Image) - (_speed + acceleration));
-                    break;
-                case (int)MoveDirection.Down:
-                    Canvas.SetTop(Image, Canvas.GetTop(Image) + (_speed + acceleration));
-                    break;
             }
         }
     }
