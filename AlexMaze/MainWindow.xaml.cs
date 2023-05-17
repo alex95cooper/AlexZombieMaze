@@ -1,55 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Shapes;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Threading;
-using System.Threading.Tasks;
 using AlexMazeEngine.Generators;
-using System.Xml.Linq;
-using System.Linq;
 using AlexMazeEngine;
+using AlexMazeEngine.Humanoids;
 
 namespace AlexMaze
 {
     public partial class MainWindow : Window
     {
-        private const string resultFile = "Result.xml";
         private const int CoinsQuantity = 10;
         private const int MazeBlockSize = 50;
-        private const int MazeSize = 11;
-        private const int MiddleLevelCoins = 10;
-        private const int HardLevelCoins = 30;
+        private const int MiddleLevelCoins = 3;
+        private const int HardLevelCoins = 6;
 
-        private readonly DispatcherTimer _gameTimer = new();
-        private readonly DispatcherTimer _animationTimer = new();
-        private readonly DispatcherTimer _motionTimer = new();
-        private readonly DispatcherTimer _coinAddTimer = new();
-        private readonly Stopwatch _stopwatch = new();
+        private readonly GameTimer _timer;
+        private readonly MapBuilder _mapBuilder = new();
 
-        private readonly List<Rect> _walls = new();
-        private readonly List<Coin> _coins = new();
-        private readonly List<Zombie> _zombies = new();
-
-        private bool[,] _maze = new bool[MazeSize, MazeSize];
+        private EntityBuilder _entityBuilder;
+        private List<Coin> _coins;
+        private List<Zombie> _zombies;
         private Player _player;
         private GameInfo _gameInfo;
         private int _score;
-        private bool _playerIsStep;
-        private bool _zombieIsHunt;
-        private bool _playerIsCaught;
-        private bool _playerIsDead;
 
         public MainWindow()
         {
             InitializeComponent();
-            XDocument doc = XDocument.Load(resultFile);
-            List<XElement> list = doc.Root.Elements().ToList();
-            NameTextBox.Text = list[0].Element("PlayerName").Value;
+            _timer = new(this);
+            NameTextBox.Text = GameInfo.GetLastPlayerName();
         }
 
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
@@ -63,14 +44,7 @@ namespace AlexMaze
 
         private void StatisticButton_Click(object sender, RoutedEventArgs e)
         {
-            XDocument doc = XDocument.Load(resultFile);
-            dataGridResult.ItemsSource = null;
-            List<XElement> list = doc.Root.Elements().ToList();
-            dataGridResult.ItemsSource = list;
-            dataGridResult.CanUserAddRows = false;
-            dataGridResult.CanUserDeleteRows = false;
-            dataGridResult.DataContext = doc;
-            dataGridResult.Visibility = Visibility.Visible;
+            dataGridResult = GameInfo.GetStatistic();
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -82,7 +56,7 @@ namespace AlexMaze
             else if (KeyIsArrow(e) && _player != null)
             {
                 _player.SetMove(e);
-                _playerIsStep = true;
+                _player.State = PlayerState.Step;
             }
         }
 
@@ -91,7 +65,7 @@ namespace AlexMaze
             if (KeyIsArrow(e))
             {
                 _player.Stop();
-                _playerIsStep = false;
+                _player.State = PlayerState.Stop;
             }
         }
 
@@ -99,254 +73,72 @@ namespace AlexMaze
         {
             if (MazePanel.Visibility == Visibility.Visible)
             {
-                _gameInfo.SetLastInfo(_score, TimeBlock.Text, _playerIsDead);
-                _gameInfo.Serialize(resultFile);
+                _gameInfo.SetLastInfo(_score, TimeBlock.Text, PlayerState.Dead);
+                _gameInfo.Serialize();
             }
         }
 
-        private void MotionLoop(object sender, EventArgs e)
+        public void MotionLoop(object sender, EventArgs e)
         {
-            ScoreBlock.Text = $"  Coins :  {_score}";
-            if (_playerIsDead)
+            if (_player.State == PlayerState.Dead)
             {
                 FinishGame();
             }
 
-            if (_playerIsCaught == false)
+            if (_player.State != PlayerState.Caught)
             {
                 TryTakeCoin();
                 _player.Move();
-                _player.TryMove(_walls);
+                _player.TryMove(_mapBuilder.Walls);
                 ZombieMove();
                 if (_score == MiddleLevelCoins && _zombies.Count == 1)
                 {
-                    CreateZombie(1);
+                    _entityBuilder.CreateZombie(1);
                 }
             }
         }
 
-        private void AnimationLoop(object sender, EventArgs e)
+        public void AnimationLoop(object sender, EventArgs e)
         {
-            if (_playerIsCaught == false)
+            if (_player.State == PlayerState.Caught)
             {
-                foreach (var coin in _coins)
-                {
-                    coin.Rotate();
-                }
-
-                if (_playerIsStep)
-                {
-                    _player.Step();
-                }
-
-                foreach (Zombie zombie in _zombies)
-                {
-                    zombie.Step();
-                }
+                AttackPlayer();
             }
             else
             {
-                foreach (Zombie zombie in _zombies)
+                Coin.Rotate(_coins);
+                Zombie.Step(_zombies);
+                if (_player.State == PlayerState.Step)
                 {
-                    if (zombie.IsAttack)
-                    {
-                        _playerIsDead = zombie.Attack();
-                    }
+                    _player.Step();
                 }
             }
         }
 
-        private void CoinAddLoop(object sender, EventArgs e)
+        public void CoinAddLoop(object sender, EventArgs e)
         {
             if (_coins.Count < CoinsQuantity)
             {
-                CreateAnotherCoin();
+                _entityBuilder.CreateAnotherCoin();
             }
         }
 
         private void LoadNewGame()
         {
-            LoadNewMap();
-            CreatePlayer();
-            CreateZombie(0);
-            CreateCoins();
-            InitialGameTime();
+            MazeCanvas.Children.Add(_mapBuilder.Canvas);
+            CreateEntities();
+            _timer.Start();
             MazeCanvas.Focusable = true;
             MazeCanvas.Focus();
         }
 
-        private void InitialGameTime()
+        private void CreateEntities()
         {
-            InitialStopWatch();
-            InitializeMobility();
-            InitialAnimation();
-            InitialCoinAdd();
-        }
-
-        private async void InitialStopWatch()
-        {
-            _gameTimer.Interval = new(0, 0, 1);
-            _gameTimer.IsEnabled = true;
-            await Task.Delay(10);
-            _gameTimer.Tick += (obj, e) => { TimeBlock.Text = "    " + _stopwatch.Elapsed.ToString(@"hh\:mm\:ss"); };
-            _stopwatch.Start();
-        }
-
-        private void InitializeMobility()
-        {
-            _motionTimer.Interval = TimeSpan.FromMilliseconds(17);
-            _motionTimer.IsEnabled = true;
-            _motionTimer.Tick += MotionLoop;
-            _motionTimer.Start();
-        }
-
-        private void InitialAnimation()
-        {
-            _animationTimer.Interval = TimeSpan.FromMilliseconds(80);
-            _animationTimer.IsEnabled = true;
-            _animationTimer.Tick += AnimationLoop;
-            _animationTimer.Start();
-        }
-
-        private void InitialCoinAdd()
-        {
-            _coinAddTimer.Interval = new(0, 0, 5);
-            _coinAddTimer.IsEnabled = true;
-            _coinAddTimer.Tick += CoinAddLoop;
-        }
-
-        private void LoadNewMap()
-        {
-            MazeGenerator generator = new();
-            _maze = generator.GenerateNewMaze();
-            AddExternalWalls();
-
-            int blockTop = 0;
-            for (int column = 0; column < _maze.GetLength(0); column++)
-            {
-                int blockLeft = 0;
-                for (int row = 0; row < _maze.GetLength(1); row++)
-                {
-                    CreateMazeItem(column, row, blockLeft, blockTop);
-                    blockLeft += MazeBlockSize;
-                }
-
-                blockTop += MazeBlockSize;
-            }
-        }
-
-        private void CreateMazeItem(int column, int row, int blockeft, int blockTop)
-        {
-            Rectangle rect = new();
-            rect.Width = rect.Height = MazeBlockSize;
-            BitmapImage mazeImage = (_maze[column, row]) ?
-                new(new Uri(@"Images\Ground.png", UriKind.Relative)) :
-                new(new Uri(@"Images\Wall.png", UriKind.Relative));
-            TryAddInternalWall(column, row);
-            ImageBrush myImageBrush = new(mazeImage);
-            rect.Fill = myImageBrush;
-            AddUiElementToCanvas(rect, blockeft, blockTop);
-        }
-
-        private void AddExternalWalls()
-        {
-            _walls.Add(new Rect(0, 0, MazeBlockSize * MazeSize, MazeBlockSize));
-            _walls.Add(new Rect(0, MazeBlockSize, MazeBlockSize, MazeBlockSize * (MazeSize - 2)));
-            _walls.Add(new Rect((MazeBlockSize * MazeSize) - 1, MazeBlockSize, MazeBlockSize, MazeBlockSize * (MazeSize - 2)));
-            _walls.Add(new Rect(0, (MazeBlockSize * MazeSize) - 1, MazeBlockSize * MazeSize, MazeBlockSize));
-        }
-
-        private void TryAddInternalWall(int column, int row)
-        {
-            if (!_maze[column, row] &&
-                0 < column && column < MazeSize &&
-                0 < row && row < MazeSize)
-            {
-                _walls.Add(new Rect(
-                    row * MazeBlockSize,
-                    column * MazeBlockSize,
-                    MazeBlockSize,
-                    MazeBlockSize));
-            }
-        }
-
-        private void CreatePlayer()
-        {
-            _player = new(@"Images\Player.png");
-            System.Drawing.Point playerPosition = StartPositionGenerator.GetPlayerPosition(_maze);
-            AddUiElementToCanvas(_player.Image,
-                playerPosition.X * MazeBlockSize + Player.DistanceToWall,
-                playerPosition.Y * MazeBlockSize + Player.DistanceToWall);
-        }
-
-        private void CreateZombie(int zombieNumber)
-        {
-            _zombies.Add(new(GetZombieImages().Item1, GetZombieImages().Item2));
-            System.Drawing.Point zombiePosition = (zombieNumber == 0) ?
-                StartPositionGenerator.GetFirstZombiePosition(_maze) :
-                StartPositionGenerator.GetSecondZombiePosition(_maze);
-            AddUiElementToCanvas(_zombies[zombieNumber].Image,
-                zombiePosition.X * MazeBlockSize + Zombie.DistanceToWall,
-                zombiePosition.Y * MazeBlockSize + Zombie.DistanceToWall);
-            _zombies[zombieNumber].SetMove();
-        }
-
-        private void CreateCoins()
-        {
-            List<System.Drawing.Point> coinPositions = StartPositionGenerator.GetCoinsPositions(_maze, CoinsQuantity);
-            for (int i = 0; i < coinPositions.Count; i++)
-            {
-                _coins.Add(new(GetCoinImages()));
-                _coins[i].Position = coinPositions[i];
-                AddUiElementToCanvas(_coins[i].Image,
-                    (coinPositions[i].X * MazeBlockSize) + Coin.DistanceToWall,
-                    (coinPositions[i].Y * MazeBlockSize) + Coin.DistanceToWall);
-            }
-        }
-
-        private void CreateAnotherCoin()
-        {
-            System.Drawing.Point coinPosition = StartPositionGenerator.GetNewCoinPosition(_maze, _coins);
-            _coins.Add(new(GetCoinImages()));
-            _coins[^1].Position = coinPosition;
-            AddUiElementToCanvas(_coins[^1].Image,
-                    (coinPosition.X * MazeBlockSize) + Coin.DistanceToWall,
-                    (coinPosition.Y * MazeBlockSize) + Coin.DistanceToWall);
-        }
-
-        private void AddUiElementToCanvas(UIElement uIElement, int left, int top)
-        {
-            Canvas.SetLeft(uIElement, left);
-            Canvas.SetTop(uIElement, top);
-            MazeCanvas.Children.Add(uIElement);
-        }
-
-        private static List<string> GetCoinImages()
-        {
-            List<string> coinImages = new();
-            for (int i = 1; i < 5; i++)
-            {
-                coinImages.Add($@"Images\Coins\Coin{i}.png");
-            }
-
-            return coinImages;
-        }
-
-        private static (List<string>, List<string>) GetZombieImages()
-        {
-            List<string> imagesWalk = new();
-            for (int i = 1; i < 11; i++)
-            {
-                imagesWalk.Add($@"Images\Zombie Walk\go_{i}.png");
-            }
-
-            List<string> imagesAttack = new();
-            for (int i = 1; i < 8; i++)
-            {
-                imagesAttack.Add($@"Images\\Zombie Attack\hit_{i}.png");
-            }
-
-            return (imagesWalk, imagesAttack);
+            _entityBuilder = new EntityBuilder(_mapBuilder.Maze, MazeBlockSize, CoinsQuantity);
+            MazeCanvas.Children.Add(_entityBuilder.Canvas);
+            _player = _entityBuilder.Player;
+            _zombies = _entityBuilder.Zombies;
+            _coins = _entityBuilder.Coins;
         }
 
         private static bool KeyIsArrow(KeyEventArgs e)
@@ -359,17 +151,23 @@ namespace AlexMaze
         {
             if (_player.TryTakeCoin(_coins, out Coin deletedCoin))
             {
+                ScoreBlock.Text = $"  Coins :  {_score}";
+                Canvas canvas = (Canvas)MazeCanvas.Children[1];
+                canvas.Children.Remove(deletedCoin.Image);
                 _coins.Remove(deletedCoin);
-                MazeCanvas.Children.Remove(deletedCoin.Image);
                 _score++;
-                if (_score >= HardLevelCoins)
+                foreach (Zombie zombie in _zombies)
                 {
-                    _zombieIsHunt = true;
-                    foreach (Zombie zombie in _zombies)
+                    if (_score == HardLevelCoins)
+                    {
+                        zombie.State = ZombieState.Hunt;
+                    }
+                    else if (_score > HardLevelCoins)
                     {
                         zombie.Accelerate();
-                    }
+                    }                  
                 }
+
             }
         }
 
@@ -377,24 +175,34 @@ namespace AlexMaze
         {
             foreach (Zombie zombie in _zombies)
             {
-                _playerIsCaught = _playerIsCaught == true || zombie.TryCatchPlayer(_player);
-                if (_zombieIsHunt)
+                zombie.TryCatchPlayer(_player);
+                
+                if (zombie.State == ZombieState.Hunt)
                 {
-                    int direction = PathGenerator.GetDirection(_maze, zombie, _player);
-                    zombie.Hunt(direction);
+                    int direction = PathGenerator.GetDirection(_mapBuilder.Maze, zombie, _player);
+                    zombie.Hunt((MoveDirection)direction);
                 }
 
                 zombie.Move();
-                zombie.TryMove(_walls);
+                zombie.TryMove(_mapBuilder.Walls);
+            }
+        }
+
+        private void AttackPlayer()
+        {
+            foreach (Zombie zombie in _zombies)
+            {
+                if (zombie.State == ZombieState.Attack)
+                {
+                    zombie.Attack();
+                    _player.State = (PlayerState)zombie.State;
+                }
             }
         }
 
         private void FinishGame()
         {
-            _gameTimer.Stop();
-            _coinAddTimer.Stop();
-            _animationTimer.Stop();
-            _motionTimer.Stop();
+            _timer.Stop();
             MainWindow newWindow = new();
             Application.Current.MainWindow = newWindow;
             newWindow.Show();

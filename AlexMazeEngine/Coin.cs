@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -33,6 +30,16 @@ namespace AlexMazeEngine
         public Image Image { get; internal set; }
         public Point Position { get; set; }
 
+        public static void Rotate(List<Coin> coins)
+        {
+            foreach (var coin in coins)
+            {
+                coin.SetImage(coin._imagesCoin[coin._rotateCounter]);
+                coin._rotateCounter++;
+                coin._rotateCounter = (coin._rotateCounter == RotateCount) ? 0 : coin._rotateCounter;
+            }                      
+        }
+
         private void SetImage(string imagePath)
         {
             BitmapImage zombieImage = new(new Uri(imagePath, UriKind.Relative));
@@ -40,13 +47,6 @@ namespace AlexMazeEngine
             Image.Source = reducedBitmap;
             Image.Width = reducedBitmap.Width;
             Image.Height = reducedBitmap.Height;
-        }
-
-        public void Rotate()
-        {
-            SetImage(_imagesCoin[_rotateCounter]);
-            _rotateCounter++;
-            _rotateCounter = (_rotateCounter == RotateCount) ? 0 : _rotateCounter;
         }
     }
 }

@@ -5,6 +5,8 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
+    <IsPublishable>True</IsPublishable>
+    <ImplicitUsings>disable</ImplicitUsings>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="bin\Release\net6.0-windows\icon.jpg" />
+    <Content Include="bin\Release\net6.0-windows\Images\icon.jpg" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,7 +29,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="icon.jpg" />
     <Resource Include="Images\Coins\Coin1.png" />
     <Resource Include="Images\Coins\Coin2.png" />
     <Resource Include="Images\Coins\Coin3.png" />

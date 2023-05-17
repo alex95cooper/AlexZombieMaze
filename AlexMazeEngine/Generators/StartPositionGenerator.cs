@@ -1,10 +1,11 @@
-﻿using System;
+﻿using AlexMazeEngine.Generators;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 
 namespace AlexMazeEngine
 {
-    public class StartPositionGenerator
+    public static class StartPositionGenerator
     {
         public static Point GetPlayerPosition(bool[,] maze)
         {
@@ -59,7 +60,7 @@ namespace AlexMazeEngine
             List<Point> coinPositions = new();
             for (int index = 0; index < coinsQuantity; index++)
             {
-                Point point = MazeGenerator.GetRandomPoint(maze, coinsQuantity, index);
+                Point point = MazePointRandomizer.GetRandomPoint(0, maze.GetLength(0) - 1, 0, maze.GetLength(1) - 1, coinsQuantity, index);
                 if (CheckIfPointRepeat(point, coinPositions) || maze[point.Y, point.X] == false)
                 {
                     index--;

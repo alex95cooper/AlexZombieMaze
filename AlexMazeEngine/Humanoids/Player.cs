@@ -1,113 +1,43 @@
-﻿using System;
+﻿using AlexMazeEngine.Humanoids;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace AlexMazeEngine
 {
-    public class Player : IHumanoid
+    public class Player : Humanoid
     {
-        public const double ImageScale = 0.5;
-        public const double Height = 32;
-        public const double Width = 12;
-        public const int StepCount = 7;
-        public const int Speed = 2;
-        public const int DistanceToWall = 1;
-
-        private readonly string _imagePath;
-
-        private int _playersLook;
-        private int _moveDirection;
-        private int _stepCounter;
+        private const int StepCount = 7;
+        private const double MinSpeed = 2;
+        private const double PlayerWidth = 12;
 
         public Player(string imagepath)
+            : base(imagepath, PlayerWidth, MinSpeed)
         {
-            _imagePath = imagepath;
-            Image = new Image();
-            _playersLook = (int)LookDirection.Right;
-            SetImage(0);
+            _lookDirection = LookDirection.Right;
         }
 
-        public Image Image { get; }
-
-        private void SetImage(int rectX)
-        {
-            BitmapImage playerImage = new(new Uri(_imagePath, UriKind.Relative));
-            TransformedBitmap reducedBitmap = new(playerImage, new ScaleTransform(ImageScale, ImageScale));
-            CroppedBitmap frame = new(reducedBitmap, new Int32Rect(rectX, 0, (int)Width, (int)Height));
-            Image.Source = frame;
-            Image.Width = frame.Width;
-            Image.Height = frame.Height;
-        }
+        public PlayerState State { get; set; }
 
         public void SetMove(KeyEventArgs e)
         {
             switch (e.Key)
             {
                 case Key.Left:
-                    _moveDirection = (int)MoveDirection.Left;
-                    TryMakeTurn((int)LookDirection.Left);
+                    _moveDirection = MoveDirection.Left;
+                    TryMakeTurn(LookDirection.Left);
                     break;
                 case Key.Right:
-                    _moveDirection = (int)MoveDirection.Right;
-                    TryMakeTurn((int)LookDirection.Right);
+                    _moveDirection = MoveDirection.Right;
+                    TryMakeTurn(LookDirection.Right);
                     break;
                 case Key.Up:
-                    _moveDirection = (int)MoveDirection.Up;
+                    _moveDirection = MoveDirection.Up;
                     break;
                 case Key.Down:
-                    _moveDirection = (int)MoveDirection.Down;
+                    _moveDirection = MoveDirection.Down;
                     break;
-            }
-        }
-
-        public void Move()
-        {
-            switch (_moveDirection)
-            {
-                case (int)MoveDirection.Left:
-                    Canvas.SetLeft(Image, Canvas.GetLeft(Image) - Speed);
-                    break;
-                case (int)MoveDirection.Right:
-                    Canvas.SetLeft(Image, Canvas.GetLeft(Image) + Speed);
-                    break;
-                case (int)MoveDirection.Up:
-                    Canvas.SetTop(Image, Canvas.GetTop(Image) - Speed);
-                    break;
-                case (int)MoveDirection.Down:
-                    Canvas.SetTop(Image, Canvas.GetTop(Image) + Speed);
-                    break;
-            }
-        }
-
-        public void TryMove(List<Rect> walls)
-        {
-            Rect playerHitBox = new(Canvas.GetLeft(Image), Canvas.GetTop(Image), Width, Height);
-            foreach (var block in walls)
-            {
-                if (playerHitBox.IntersectsWith(block))
-                {
-                    switch (_moveDirection)
-                    {
-                        case (int)MoveDirection.Left:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) + (Speed + DistanceToWall));
-                            break;
-                        case (int)MoveDirection.Right:
-                            Canvas.SetLeft(Image, Canvas.GetLeft(Image) - (Speed + DistanceToWall));
-                            break;
-                        case (int)MoveDirection.Up:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) + (Speed + DistanceToWall));
-                            break;
-                        case (int)MoveDirection.Down:
-                            Canvas.SetTop(Image, Canvas.GetTop(Image) - (Speed + DistanceToWall));
-                            break;
-                    }
-
-                    _moveDirection = (int)MoveDirection.None;
-                }
             }
         }
 
@@ -131,27 +61,27 @@ namespace AlexMazeEngine
 
         public void Stop()
         {
-            _moveDirection = (int)MoveDirection.None;
-            SetImage(0);
+            _moveDirection = MoveDirection.None;
+            SetImage(_imagePath);
         }
 
         public void Step()
         {
             _stepCounter++;
-            SetImage((int)Width * _stepCounter);
+            SetImage(_imagePath, (int)Width * _stepCounter);
             _stepCounter = (_stepCounter == StepCount) ? 0 : _stepCounter;
         }
 
-        private void TryMakeTurn(int playerLook)
+        private void TryMakeTurn(LookDirection playerLook)
         {
-            if (playerLook == (int)LookDirection.Left && _playersLook != (int)LookDirection.Left)
+            if (playerLook == LookDirection.Left && _lookDirection != LookDirection.Left)
             {
-                _playersLook = (int)LookDirection.Left;
+                _lookDirection = LookDirection.Left;
                 Image.FlowDirection = FlowDirection.RightToLeft;
             }
-            else if (playerLook == (int)LookDirection.Right && _playersLook != (int)LookDirection.Right)
+            else if (playerLook == LookDirection.Right && _lookDirection != LookDirection.Right)
             {
-                _playersLook = (int)LookDirection.Right;
+                _lookDirection = LookDirection.Right;
                 Image.FlowDirection = FlowDirection.LeftToRight;
             }
         }

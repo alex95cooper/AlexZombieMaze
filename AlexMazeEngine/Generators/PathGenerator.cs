@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Drawing;
 using System.Windows.Controls;
+using AlexMazeEngine.Humanoids;
 
 namespace AlexMazeEngine.Generators
 {
@@ -94,10 +95,10 @@ namespace AlexMazeEngine.Generators
 
         private static System.Drawing.Point ToPoint(Zombie zombie)
         {
-            int column = (zombie.MoveDirection == (int)MoveDirection.Up) ?
-               (int)((Canvas.GetTop(zombie.Image) + Zombie.Height) / MazeBlockSize) : (int)(Canvas.GetTop(zombie.Image) / MazeBlockSize);
-            int row = (zombie.MoveDirection == (int)MoveDirection.Left) ?
-                (int)((Canvas.GetLeft(zombie.Image) + Zombie.Width) / MazeBlockSize) : (int)(Canvas.GetLeft(zombie.Image) / MazeBlockSize);
+            int column = (zombie.MoveDirection == MoveDirection.Up) ?
+               (int)((Canvas.GetTop(zombie.Image) + Humanoid.Height) / MazeBlockSize) : (int)(Canvas.GetTop(zombie.Image) / MazeBlockSize);
+            int row = (zombie.MoveDirection == MoveDirection.Left) ?
+                (int)((Canvas.GetLeft(zombie.Image) + zombie.Width) / MazeBlockSize) : (int)(Canvas.GetLeft(zombie.Image) / MazeBlockSize);
             return new(row, column);
         }
 
