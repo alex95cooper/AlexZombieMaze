@@ -15,7 +15,7 @@ namespace AlexMazeEngine
         public Player(string imagepath)
             : base(imagepath, PlayerWidth, MinSpeed)
         {
-            _lookDirection = LookDirection.Right;
+            LookDirection = LookDirection.Right;
         }
 
         public PlayerState State { get; set; }
@@ -25,18 +25,18 @@ namespace AlexMazeEngine
             switch (e.Key)
             {
                 case Key.Left:
-                    _moveDirection = MoveDirection.Left;
+                    MoveDirection = MoveDirection.Left;
                     TryMakeTurn(LookDirection.Left);
                     break;
                 case Key.Right:
-                    _moveDirection = MoveDirection.Right;
+                    MoveDirection = MoveDirection.Right;
                     TryMakeTurn(LookDirection.Right);
                     break;
                 case Key.Up:
-                    _moveDirection = MoveDirection.Up;
+                    MoveDirection = MoveDirection.Up;
                     break;
                 case Key.Down:
-                    _moveDirection = MoveDirection.Down;
+                    MoveDirection = MoveDirection.Down;
                     break;
             }
         }
@@ -61,29 +61,34 @@ namespace AlexMazeEngine
 
         public void Stop()
         {
-            _moveDirection = MoveDirection.None;
-            SetImage(_imagePath);
+            MoveDirection = MoveDirection.None;
+            SetImage(ImagePath);
         }
 
         public void Step()
         {
-            _stepCounter++;
-            SetImage(_imagePath, (int)Width * _stepCounter);
-            _stepCounter = (_stepCounter == StepCount) ? 0 : _stepCounter;
+            StepCounter++;
+            SetImage(ImagePath, (int)Width * StepCounter);
+            StepCounter = (StepCounter == StepCount) ? 0 : StepCounter;
         }
 
         private void TryMakeTurn(LookDirection playerLook)
         {
-            if (playerLook == LookDirection.Left && _lookDirection != LookDirection.Left)
+            if (playerLook == LookDirection.Left && LookDirection != LookDirection.Left)
             {
-                _lookDirection = LookDirection.Left;
+                LookDirection = LookDirection.Left;
                 Image.FlowDirection = FlowDirection.RightToLeft;
             }
-            else if (playerLook == LookDirection.Right && _lookDirection != LookDirection.Right)
+            else if (playerLook == LookDirection.Right && LookDirection != LookDirection.Right)
             {
-                _lookDirection = LookDirection.Right;
+                LookDirection = LookDirection.Right;
                 Image.FlowDirection = FlowDirection.LeftToRight;
             }
+        }
+
+        public override void AvoidTouchingWall()
+        {
+            MoveDirection = MoveDirection.None;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using AlexMazeEngine.Humanoids;
+using System;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -6,6 +8,11 @@ namespace AlexMazeEngine.Generators
 {
     public class EntityBuilder
     {
+        private const string PlayerImagePath = @"Images\Player.png";
+        private const string CoinsImagePath = @"Images\Coins\Coin{i}.png";
+        private const string ZombieWalkImagePath = @"Images\Zombie Walk\go_{i}.png";
+        private const string ZombieAttackImagePath = @"Images\Zombie Attack\hit_{i}.png";
+
         private readonly List<Zombie> _zombies = new();
         private readonly List<Coin> _coins = new();
         private readonly Canvas _canvas = new();
@@ -47,18 +54,18 @@ namespace AlexMazeEngine.Generators
                 StartPositionGenerator.GetFirstZombiePosition(_maze) :
                 StartPositionGenerator.GetSecondZombiePosition(_maze);
             MapBuilder.AddUiElementToCanvas(_canvas, _zombies[zombieNumber].Image,
-                zombiePosition.X * _mazeBlockSize + Zombie.DistanceToWall,
-                zombiePosition.Y * _mazeBlockSize + Zombie.DistanceToWall);
+                zombiePosition.X * _mazeBlockSize + Humanoid.DistanceToWall,
+                zombiePosition.Y * _mazeBlockSize + Humanoid.DistanceToWall);
             _zombies[zombieNumber].SetMove();
         }
 
         private void CreatePlayer()
         {
-            _player = new(@"Images\Player.png");
+            _player = new(PlayerImagePath);
             System.Drawing.Point playerPosition = StartPositionGenerator.GetPlayerPosition(_maze);
             MapBuilder.AddUiElementToCanvas(_canvas, _player.Image,
-                playerPosition.X * _mazeBlockSize + Player.DistanceToWall,
-                playerPosition.Y * _mazeBlockSize + Player.DistanceToWall);
+                playerPosition.X * _mazeBlockSize + Humanoid.DistanceToWall,
+                playerPosition.Y * _mazeBlockSize + Humanoid.DistanceToWall);
         }
 
         private void CreateCoins()
@@ -79,7 +86,7 @@ namespace AlexMazeEngine.Generators
             List<string> coinImages = new();
             for (int i = 1; i < 5; i++)
             {
-                coinImages.Add($@"Images\Coins\Coin{i}.png");
+                coinImages.Add(string.Format(CoinsImagePath, i));
             }
 
             return coinImages;
@@ -90,13 +97,13 @@ namespace AlexMazeEngine.Generators
             List<string> imagesWalk = new();
             for (int i = 1; i < 11; i++)
             {
-                imagesWalk.Add($@"Images\Zombie Walk\go_{i}.png");
+                imagesWalk.Add(string.Format(ZombieWalkImagePath, i));
             }
 
             List<string> imagesAttack = new();
             for (int i = 1; i < 8; i++)
             {
-                imagesAttack.Add($@"Images\\Zombie Attack\hit_{i}.png");
+                imagesAttack.Add(string.Format(ZombieAttackImagePath, i));
             }
 
             return (imagesWalk, imagesAttack);

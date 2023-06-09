@@ -12,13 +12,13 @@ namespace AlexMazeEngine.Generators
         private const int FreeWay = -1;
         private const int Wall = -2;
 
-        public static int GetDirection(bool[,] maze, Zombie zombie, Player player)
+        public static MoveDirection GetDirection(bool[,] maze, Zombie zombie, Player player)
         {
             System.Drawing.Point start = ToPoint(zombie);
             System.Drawing.Point target = ToPoint(player);
             int[,] intMaze = ToIntArray(maze);
             intMaze = DrawPath(intMaze, start, target);
-            return (CheckIfTargetBeside(intMaze, start, target, zombie, player, out int direction)) ? 
+            return (CheckIfTargetBeside(intMaze, start, target, zombie, player, out MoveDirection direction)) ? 
                 direction : GenerateDirection(intMaze, start);
         }
 
@@ -53,14 +53,14 @@ namespace AlexMazeEngine.Generators
             return maze;
         }
 
-        private static bool CheckIfTargetBeside(int[,] maze, System.Drawing.Point start, System.Drawing.Point target, Zombie zombie, Player player, out int direction)
+        private static bool CheckIfTargetBeside(int[,] maze, System.Drawing.Point start, System.Drawing.Point target, Zombie zombie, Player player, out MoveDirection direction)
         {
-            direction = (int)MoveDirection.None;
+            direction = MoveDirection.None;
             if (maze[start.Y, start.X] == maze[target.Y, target.X])
             {
                 if ((int)Canvas.GetTop(zombie.Image) == (int)Canvas.GetTop(player.Image))
                 {
-                    direction = (Canvas.GetLeft(zombie.Image) > Canvas.GetLeft(player.Image)) ? (int)MoveDirection.Left : (int)MoveDirection.Right;
+                    direction = (Canvas.GetLeft(zombie.Image) > Canvas.GetLeft(player.Image)) ? MoveDirection.Left : MoveDirection.Right;
                 }
 
                 return true;
@@ -69,25 +69,25 @@ namespace AlexMazeEngine.Generators
             return false;
         }
 
-        private static int GenerateDirection(int[,] maze, System.Drawing.Point start)
+        private static MoveDirection GenerateDirection(int[,] maze, System.Drawing.Point start)
         {
-            int direction = 0;
+            MoveDirection direction = 0;
             int rightWay = maze[start.Y, start.X] - 1;
             if (maze[start.Y, start.X - 1] == rightWay)
             {
-                direction = (int)MoveDirection.Left;
+                direction = MoveDirection.Left;
             }
             else if (maze[start.Y, start.X + 1] == rightWay)
             {
-                direction = (int)MoveDirection.Right;
+                direction = MoveDirection.Right;
             }
             else if (maze[start.Y - 1, start.X] == rightWay)
             {
-                direction = (int)MoveDirection.Up;
+                direction = MoveDirection.Up;
             }
             else if (maze[start.Y + 1, start.X] == rightWay)
             {
-                direction = (int)MoveDirection.Down;
+                direction = MoveDirection.Down;
             }
 
             return direction;

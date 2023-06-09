@@ -175,12 +175,11 @@ namespace AlexMaze
         {
             foreach (Zombie zombie in _zombies)
             {
-                zombie.TryCatchPlayer(_player);
-                
+                zombie.TryCatchPlayer(_player);               
                 if (zombie.State == ZombieState.Hunt)
                 {
-                    int direction = PathGenerator.GetDirection(_mapBuilder.Maze, zombie, _player);
-                    zombie.Hunt((MoveDirection)direction);
+                    MoveDirection direction = PathGenerator.GetDirection(_mapBuilder.Maze, zombie, _player);
+                    zombie.Hunt(direction);
                 }
 
                 zombie.Move();

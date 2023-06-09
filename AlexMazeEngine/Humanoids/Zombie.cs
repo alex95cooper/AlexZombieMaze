@@ -26,20 +26,20 @@ namespace AlexMazeEngine
         {
             _imagesWalk = imagesWalk;
             _imagesAttack = imagesAttack;
-            _speed = 0.5;
+            Speed = 0.5;
             _zombieWalksHorizontally = true;
-            _lookDirection = LookDirection.Left;
+            LookDirection = LookDirection.Left;
         }
 
         public bool IsAttack { get; private set; }
         public ZombieState State { get; set; }
 
-        public override void SetMove()
+        public void SetMove()
         {
             Random random = new();
             MoveDirection horizontalDirection = (MoveDirection)random.Next((int)MoveDirection.Left, (int)MoveDirection.Right + 1);
             MoveDirection verticalDirection = (MoveDirection)random.Next((int)MoveDirection.Up, (int)MoveDirection.Down + 1);
-            _moveDirection = (_zombieWalksHorizontally) ? horizontalDirection : verticalDirection;
+            MoveDirection = (_zombieWalksHorizontally) ? horizontalDirection : verticalDirection;
             _zombieWalksHorizontally = !_zombieWalksHorizontally;
             TryMakeTurn();
         }
@@ -48,18 +48,18 @@ namespace AlexMazeEngine
         {
             foreach (Zombie zombie in zombies)
             {
-                zombie.SetImage(zombie._imagesWalk[zombie._stepCounter]);
-                zombie._stepCounter++;
-                zombie._stepCounter = (zombie._stepCounter == StepCount) ? 0 : zombie._stepCounter;
+                zombie.SetImage(zombie._imagesWalk[zombie.StepCounter]);
+                zombie.StepCounter++;
+                zombie.StepCounter = (zombie.StepCounter == StepCount) ? 0 : zombie.StepCounter;
             }
 
         }
 
         public void Hunt(MoveDirection direction)
         {
-            if (direction != _moveDirection && direction != MoveDirection.None)
+            if (direction != MoveDirection && direction != MoveDirection.None)
             {
-                _moveDirection = direction;
+                MoveDirection = direction;
                 TryMakeTurn();
             }
         }
@@ -82,24 +82,29 @@ namespace AlexMazeEngine
 
         public void Accelerate()
         {
-            if (_speed < MaxSpeed)
+            if (Speed < MaxSpeed)
             {
-                _speed += _speed * Acceleration;
+                Speed += Speed * Acceleration;
             }
         }
 
         private void TryMakeTurn()
         {
-            if (_moveDirection == (MoveDirection)LookDirection.Left && _lookDirection != LookDirection.Left)
+            if (MoveDirection == (MoveDirection)LookDirection.Left && LookDirection != LookDirection.Left)
             {
-                _lookDirection = LookDirection.Left;
+                LookDirection = LookDirection.Left;
                 Image.FlowDirection = FlowDirection.LeftToRight;
             }
-            else if (_moveDirection == (MoveDirection)LookDirection.Right && _lookDirection != LookDirection.Right)
+            else if (MoveDirection == (MoveDirection)LookDirection.Right && LookDirection != LookDirection.Right)
             {
-                _lookDirection = LookDirection.Right;
+                LookDirection = LookDirection.Right;
                 Image.FlowDirection = FlowDirection.RightToLeft;
             }
+        }
+
+        public override void AvoidTouchingWall()
+        {
+            SetMove();
         }
     }
 }

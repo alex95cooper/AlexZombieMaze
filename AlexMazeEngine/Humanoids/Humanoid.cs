@@ -7,33 +7,32 @@ using System.Windows.Media.Imaging;
 
 namespace AlexMazeEngine.Humanoids
 {
-    public class Humanoid
+    public abstract class Humanoid
     {
         protected const double ImageScale = 0.5;
 
-        protected double _speed;
-        protected int _stepCounter;
-        protected string _imagePath;
-        protected MoveDirection _moveDirection;
-        protected LookDirection _lookDirection;
+        public const int DistanceToWall = 1;
+        public const double Height = 32;
+
+        protected int StepCounter;
+        protected string ImagePath;
+        protected LookDirection LookDirection;
 
         public Humanoid(string imagepath, double width, double speed)
         {
             Width = width;
             Image = new Image();
-            _speed = speed;
-            _imagePath = imagepath;
-            SetImage(_imagePath);
+            Speed = speed;
+            ImagePath = imagepath;
+            SetImage(ImagePath);
         }
 
-        public static int DistanceToWall => 1;
-        public static double Height => 32;
 
         public double Width { get; }
         public Image Image { get; }
 
-        public MoveDirection MoveDirection => _moveDirection;
-        public double Speed => _speed;
+        public MoveDirection MoveDirection { get; internal set; }
+        public double Speed { get; internal set; }
 
         public void SetImage(string imagePath, int rectX = 0)
         {
@@ -45,7 +44,7 @@ namespace AlexMazeEngine.Humanoids
             Image.Height = frame.Height;
         }
 
-        public virtual void SetMove() { }
+        public abstract void AvoidTouchingWall();
 
         public void Move()
         {
@@ -89,20 +88,8 @@ namespace AlexMazeEngine.Humanoids
                             break;
                     }
 
-                    SetMoveOrImmobilize();
+                    AvoidTouchingWall();
                 }
-            }
-        }
-
-        protected void SetMoveOrImmobilize()
-        {
-            if (this is Player)
-            {
-                _moveDirection = MoveDirection.None;
-            }
-            else
-            {
-                SetMove();
             }
         }
     }

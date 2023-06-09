@@ -10,6 +10,8 @@ namespace AlexMazeEngine
 {
     public class MapBuilder
     {
+        private const string GroundImagePath = @"Images\Ground.png";
+        private const string WallImagePath = @"Images\Wall.png";
         private const int MazeBlockSize = 50;
         private readonly Canvas _canvas;
         private readonly bool[,] _maze;
@@ -54,8 +56,8 @@ namespace AlexMazeEngine
             Rectangle rect = new();
             rect.Width = rect.Height = MazeBlockSize;
             BitmapImage mazeImage = (_maze[column, row]) ?
-                new(new Uri(@"Images\Ground.png", UriKind.Relative)) :
-                new(new Uri(@"Images\Wall.png", UriKind.Relative));
+                new(new Uri(GroundImagePath, UriKind.Relative)) :
+                new(new Uri(WallImagePath, UriKind.Relative));
             TryAddWall(column, row);
             ImageBrush myImageBrush = new(mazeImage);
             rect.Fill = myImageBrush;
