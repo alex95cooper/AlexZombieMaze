@@ -11,13 +11,6 @@
 
   <ItemGroup>
     <None Remove="icon.jpg" />
-    <None Remove="Images\Coins\Coin1.png" />
-    <None Remove="Images\Coins\Coin2.png" />
-    <None Remove="Images\Coins\Coin3.png" />
-    <None Remove="Images\Coins\Coin4.png" />
-    <None Remove="Images\Ground.png" />
-    <None Remove="Images\Player.png" />
-    <None Remove="Images\Wall.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,17 +22,91 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Images\Coins\Coin1.png" />
-    <Resource Include="Images\Coins\Coin2.png" />
-    <Resource Include="Images\Coins\Coin3.png" />
-    <Resource Include="Images\Coins\Coin4.png" />
-    <Resource Include="Images\Ground.png" />
-    <Resource Include="Images\Player.png" />
-    <Resource Include="Images\Wall.png" />
+    <Folder Include="bin\Debug\net6.0-windows\" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="bin\Debug\net6.0-windows\" />
+    <ApplicationDefinition Update="App.xaml">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ApplicationDefinition>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Images\Coins\Coin1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Coins\Coin2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Coins\Coin3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Coins\Coin4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Ground.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Player.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Wall.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Attack\hit_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Attack\hit_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Attack\hit_3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Attack\hit_4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Attack\hit_5.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Attack\hit_6.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Attack\hit_7.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_1.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_10.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_3.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_4.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_5.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_6.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_7.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_8.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Images\Zombie Walk\go_9.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Result.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

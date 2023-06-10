@@ -9,9 +9,9 @@ namespace AlexMazeEngine.Generators
     public class EntityBuilder
     {
         private const string PlayerImagePath = @"Images\Player.png";
-        private const string CoinsImagePath = @"Images\Coins\Coin{i}.png";
-        private const string ZombieWalkImagePath = @"Images\Zombie Walk\go_{i}.png";
-        private const string ZombieAttackImagePath = @"Images\Zombie Attack\hit_{i}.png";
+        private const string CoinsImagePath = @"Images\Coins\Coin{0}.png";
+        private const string ZombieWalkImagePath = @"Images\Zombie Walk\go_{0}.png";
+        private const string ZombieAttackImagePath = @"Images\Zombie Attack\hit_{0}.png";
 
         private readonly List<Zombie> _zombies = new();
         private readonly List<Coin> _coins = new();
