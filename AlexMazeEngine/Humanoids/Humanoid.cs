@@ -34,11 +34,12 @@ namespace AlexMazeEngine.Humanoids
         public MoveDirection MoveDirection { get; internal set; }
         public double Speed { get; internal set; }
 
-        public void SetImage(string imagePath, int rectX = 0)
+        public void SetImage(string imagePath, int rectX = 0, int width = 0)
         {
+            width = (width == 0) ? (int)Width : width;
             BitmapImage humanoidImage = new(new Uri(imagePath, UriKind.Relative));
             TransformedBitmap reducedBitmap = new(humanoidImage, new ScaleTransform(ImageScale, ImageScale));
-            CroppedBitmap frame = new(reducedBitmap, new Int32Rect(rectX, 0, (int)Width, (int)Height));
+            CroppedBitmap frame = new(reducedBitmap, new Int32Rect(rectX, 0, width, (int)Height));
             Image.Source = frame;
             Image.Width = frame.Width;
             Image.Height = frame.Height;

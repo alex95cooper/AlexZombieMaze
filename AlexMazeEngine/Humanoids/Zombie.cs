@@ -12,6 +12,7 @@ namespace AlexMazeEngine
         private const double MinSpeed = 0.5;
         private const double MaxSpeed = 10;
         private const double ZombieWidth = 20;
+        private const int ZombieAttackWidth = 33;
         private const double Acceleration = 0.05;
         private const int AttackCount = 7;
 
@@ -52,7 +53,6 @@ namespace AlexMazeEngine
                 zombie.StepCounter++;
                 zombie.StepCounter = (zombie.StepCounter == StepCount) ? 0 : zombie.StepCounter;
             }
-
         }
 
         public void Hunt(MoveDirection direction)
@@ -67,7 +67,7 @@ namespace AlexMazeEngine
         public void Attack()
         {
             _attackCounter = (_attackCounter == 7) ? 0 : _attackCounter;
-            SetImage(_imagesAttack[_attackCounter]);
+            SetImage(_imagesAttack[_attackCounter], 0 , ZombieAttackWidth);
             _attackCounter++;
             State = (_attackCounter > AttackCount - 1) ? ZombieState.kill : State;
         }

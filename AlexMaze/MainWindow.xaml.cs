@@ -13,12 +13,12 @@ namespace AlexMaze
     {
         private const int CoinsQuantity = 10;
         private const int MazeBlockSize = 50;
-        private const int MiddleLevelCoins = 3;
-        private const int HardLevelCoins = 6;
+        private const int MiddleLevelCoins = 10;
+        private const int HardLevelCoins = 30;
 
-        private readonly GameTimer _timer;
         private readonly MapBuilder _mapBuilder = new();
 
+        private GameTimer _timer;
         private EntityBuilder _entityBuilder;
         private List<Coin> _coins;
         private List<Zombie> _zombies;
@@ -28,9 +28,7 @@ namespace AlexMaze
 
         public MainWindow()
         {
-            InitializeComponent();
-            _timer = new(this);
-            NameTextBox.Text = GameInfo.GetLastPlayerName();
+            StartApp();
         }
 
         private void NewGameButton_Click(object sender, RoutedEventArgs e)
@@ -44,7 +42,8 @@ namespace AlexMaze
 
         private void StatisticButton_Click(object sender, RoutedEventArgs e)
         {
-            dataGridResult = GameInfo.GetStatistic();
+            DataGridResult = GameInfo.GetStatistic(DataGridResult);
+            DataGridResult.Visibility = Visibility.Visible;
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -69,11 +68,16 @@ namespace AlexMaze
             }
         }
 
+        private void ToMenuButton_Click(object sender, RoutedEventArgs e)
+        {
+            FinishGame();
+        }
+
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (MazePanel.Visibility == Visibility.Visible)
             {
-                _gameInfo.SetLastInfo(_score, TimeBlock.Text, PlayerState.Dead);
+                _gameInfo.SetLastInfo(_score, TimeBlock.Text, _player.State);
                 _gameInfo.Serialize();
             }
         }
@@ -82,10 +86,10 @@ namespace AlexMaze
         {
             if (_player.State == PlayerState.Dead)
             {
-                FinishGame();
+                _timer.Stop();
+                GameOverPanel.Visibility = Visibility.Visible;
             }
-
-            if (_player.State != PlayerState.Caught)
+            else if (_player.State != PlayerState.Caught)
             {
                 TryTakeCoin();
                 _player.Move();
@@ -123,6 +127,15 @@ namespace AlexMaze
             }
         }
 
+        private void StartApp()
+        {
+            InitializeComponent();
+            _timer = new(this);
+            GameInfo.CreateResultsIfNeed();
+            NameTextBox.Text = GameInfo.GetLastPlayerName();
+            ScoreBlock.Text = $"  Coins :  {_score}";
+        }
+
         private void LoadNewGame()
         {
             MazeCanvas.Children.Add(_mapBuilder.Canvas);
@@ -151,11 +164,11 @@ namespace AlexMaze
         {
             if (_player.TryTakeCoin(_coins, out Coin deletedCoin))
             {
+                _score++;
                 ScoreBlock.Text = $"  Coins :  {_score}";
                 Canvas canvas = (Canvas)MazeCanvas.Children[1];
                 canvas.Children.Remove(deletedCoin.Image);
                 _coins.Remove(deletedCoin);
-                _score++;
                 foreach (Zombie zombie in _zombies)
                 {
                     if (_score == HardLevelCoins)
@@ -165,9 +178,8 @@ namespace AlexMaze
                     else if (_score > HardLevelCoins)
                     {
                         zombie.Accelerate();
-                    }                  
+                    }
                 }
-
             }
         }
 
@@ -175,7 +187,7 @@ namespace AlexMaze
         {
             foreach (Zombie zombie in _zombies)
             {
-                zombie.TryCatchPlayer(_player);               
+                zombie.TryCatchPlayer(_player);
                 if (zombie.State == ZombieState.Hunt)
                 {
                     MoveDirection direction = PathGenerator.GetDirection(_mapBuilder.Maze, zombie, _player);
@@ -201,11 +213,15 @@ namespace AlexMaze
 
         private void FinishGame()
         {
-            _timer.Stop();
-            MainWindow newWindow = new();
-            Application.Current.MainWindow = newWindow;
-            newWindow.Show();
-            this.Close();
+            GameOverPanel.Visibility = Visibility.Collapsed;
+            MazePanel.Visibility = Visibility.Collapsed;
+            MenuPanel.Visibility = Visibility.Visible;
+            DataGridResult.Visibility = Visibility.Collapsed;
+            MazeCanvas.Children.Clear();
+            _gameInfo.SetLastInfo(_score, TimeBlock.Text, _player.State);
+            _gameInfo.Serialize();
+            _score = 0;
+            StartApp();
         }
     }
 }

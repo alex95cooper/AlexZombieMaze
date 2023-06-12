@@ -1,6 +1,7 @@
 ﻿using AlexMazeEngine.Humanoids;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,7 +15,7 @@ namespace AlexMazeEngine
 
         public GameInfo(string name)
         {
-            PlayerName = (name == string.Empty) ? "Player1" : name;
+            PlayerName = (name == string.Empty) ? "Player" : name;
             GameDate = DateTime.Now;
             Score = 0;
             CauseOfFinish = string.Empty;
@@ -26,6 +27,17 @@ namespace AlexMazeEngine
         public string CauseOfFinish { set; get; }
         public int Score { set; get; }
 
+        public static void CreateResultsIfNeed()
+        {
+            if (!File.Exists(ResultFile))
+            {
+                XDocument doc = new();
+                XElement results = new("results");
+                doc.Add(results);
+                doc.Save(ResultFile);
+            }
+        }
+
         public void SetLastInfo(int score, string timeInMaze, PlayerState state)
         {
             Score = score;
@@ -36,7 +48,7 @@ namespace AlexMazeEngine
         public void Serialize()
         {
             XDocument doc = XDocument.Load(ResultFile);
-            doc.Element("Results").AddFirst(
+            doc.Element("results").AddFirst(
                 new XElement("GameInfo",
                 new XElement("PlayerName", PlayerName),
                 new XElement("Score", Score),
@@ -46,17 +58,19 @@ namespace AlexMazeEngine
             doc.Save(ResultFile);
         }
 
-        public static DataGrid GetStatistic()
+        public static DataGrid GetStatistic(DataGrid dataGridResult)
         {
-            DataGrid dataGridResult = new();
             XDocument doc = XDocument.Load(ResultFile);
-            dataGridResult.ItemsSource = null;
             List<XElement> list = doc.Root.Elements().ToList();
+            if (list.Count == 0)
+            {
+                return dataGridResult;
+            } 
+
             dataGridResult.ItemsSource = list;
             dataGridResult.CanUserAddRows = false;
             dataGridResult.CanUserDeleteRows = false;
-            dataGridResult.DataContext = doc;
-            dataGridResult.Visibility = Visibility.Visible;
+            dataGridResult.DataContext = doc;            
             return dataGridResult;
         }
 
@@ -64,7 +78,7 @@ namespace AlexMazeEngine
         {
             XDocument doc = XDocument.Load(ResultFile);
             List<XElement> list = doc.Root.Elements().ToList();
-            return list[0].Element("PlayerName").Value;
+            return (list.Count == 0)? "Player" : list[0].Element("PlayerName").Value;
         }
     }
 }
